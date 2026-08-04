@@ -10,7 +10,7 @@
       "properties": {
         "Ten Phuong/Xa": "Phuong Cho Quan (mau)",
         "Quan/Huyen": "Quan 5",
-        "Dia chi chinh xac": "273 An Duong Vuong, Quan 5",
+        "Dia chi chinh xac": "273 An Duong Vuong, Phuong Cho Quan, Quan 5",
         "So dien thoai": "028 3832 1234"
       }
     },
@@ -23,8 +23,47 @@
       "properties": {
         "Ten Phuong/Xa": "Phuong Ben Thanh (mau)",
         "Quan/Huyen": "Quan 1",
-        "Dia chi chinh xac": "1 Cong xa Paris, Quan 1",
+        "Dia chi chinh xac": "1 Cong xa Paris, Phuong Ben Thanh, Quan 1",
         "So dien thoai": "028 3829 5678"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.78767423978857, 10.84656475496081]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Phuong Tang Nhon Phu",
+        "Quan/Huyen": "TP Thu Duc",
+        "Dia chi chinh xac": "29 Duong Le Van Viet, Phuong Tang Nhon Phu, TP Thu Duc",
+        "So dien thoai": "028 3726 1234"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.77157536310895, 10.847651997537744]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Phuong Thu Duc",
+        "Quan/Huyen": "TP Thu Duc",
+        "Dia chi chinh xac": "2 Nguyen Cong Tru, Phuong Thu Duc, TP Thu Duc",
+        "So dien thoai": "028 3896 1234"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.82398269376739, 10.843114461278324]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Phuong Long Binh",
+        "Quan/Huyen": "TP Thu Duc",
+        "Dia chi chinh xac": "325 Nguyen Van Tang, Phuong Long Binh, TP Thu Duc",
+        "So dien thoai": "028 3728 5678"
       }
     }
   ]

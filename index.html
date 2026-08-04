@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Bản đồ UBND TP.HCM - Mùa Hè Xanh 2026</title>
+    <title>Ban do UBND TP.HCM - Mua He Xanh 2026</title>
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet LocateControl CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.83.1/dist/L.Control.Locate.min.css" />
+
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet LocateControl JS -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.83.1/dist/L.Control.Locate.min.js" charset="utf-8"></script>
 
-    <!-- File CSS của bạn -->
     <link rel="stylesheet" href="style.css" />
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
-
-    <!-- HEADER: Tiêu đề và thanh tìm kiếm -->
+    <!-- Dau trang -->
     <div id="header">
         <h1>Ban do UBND cac phuong moi TP.HCM</h1>
         <div id="search-box">
@@ -24,15 +29,28 @@
         </div>
     </div>
 
-    <!-- BAN DO -->
+    <!-- Lua chon ban kinh -->
+    <div id="radius-selector">
+        <span>Ban kinh tim:</span>
+        <button class="radius-btn active" data-radius="5">5km</button>
+        <button class="radius-btn" data-radius="10">10km</button>
+        <button class="radius-btn" data-radius="15">15km</button>
+    </div>
+
+    <!-- Vung hien thi danh sach goi y -->
+    <div id="suggestions" style="display:none;">
+        <div><strong>Cac UBND gan ban (trong 5km):</strong></div>
+        <div id="suggestions-list"></div>
+    </div>
+
+    <!-- Ban do -->
     <div id="map"></div>
 
-    <!-- FOOTER -->
+    <!-- Chan trang -->
     <div id="footer">
         <span>2026 - Doi Mua He Xanh | Du lieu tu Nghi quyet 1685</span>
     </div>
 
-    <!-- File JavaScript của bạn -->
     <script src="script.js"></script>
 </body>
 </html>
