@@ -1,0 +1,31 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.6814, 10.7508]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Phuong Cho Quan (mau)",
+        "Quan/Huyen": "Quan 5",
+        "Dia chi chinh xac": "273 An Duong Vuong, Quan 5",
+        "So dien thoai": "028 3832 1234"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.6950, 10.7766]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Phuong Ben Thanh (mau)",
+        "Quan/Huyen": "Quan 1",
+        "Dia chi chinh xac": "1 Cong xa Paris, Quan 1",
+        "So dien thoai": "028 3829 5678"
+      }
+    }
+  ]
+}

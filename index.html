@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Bản đồ UBND TP.HCM - Mùa Hè Xanh 2026</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- File CSS của bạn -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- HEADER: Tiêu đề và thanh tìm kiếm -->
+    <div id="header">
+        <h1>Ban do UBND cac phuong moi TP.HCM</h1>
+        <div id="search-box">
+            <input type="text" id="searchInput" placeholder="Tim phuong..." />
+            <button id="searchBtn">Tim</button>
+        </div>
+    </div>
+
+    <!-- BAN DO -->
+    <div id="map"></div>
+
+    <!-- FOOTER -->
+    <div id="footer">
+        <span>2026 - Doi Mua He Xanh | Du lieu tu Nghi quyet 1685</span>
+    </div>
+
+    <!-- File JavaScript của bạn -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+/* Reset CSS co ban */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f0f2f5;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+#header {
+    background: #1a73e8;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 1000;
+    flex-shrink: 0;
+}
+
+#header h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 4px 0;
+}
+
+#search-box {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#searchInput {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    width: 220px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+#searchInput:focus {
+    width: 280px;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+}
+
+#searchBtn {
+    padding: 8px 18px;
+    background: #ffb300;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#searchBtn:hover {
+    background: #ffca28;
+    transform: scale(1.03);
+}
+
+/* ===== BAN DO ===== */
+#map {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    background: #e5e5e5;
+}
+
+/* ===== FOOTER ===== */
+#footer {
+    background: #1a1a2e;
+    color: #aaa;
+    text-align: center;
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* ===== RESPONSIVE (Mobile) ===== */
+@media (max-width: 640px) {
+    #header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 10px 14px;
+        gap: 8px;
+    }
+
+    #header h1 {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    #search-box {
+        justify-content: center;
+    }
+
+    #searchInput {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 10px 14px;
+    }
+
+    #searchInput:focus {
+        width: 100%;
+    }
+
+    #searchBtn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        flex: 0 0 auto;
+    }
+
+    #footer {
+        font-size: 0.65rem;
+        padding: 6px 10px;
+    }
+}
+
+/* ===== TUY CHINH POPUP ===== */
+.leaflet-popup-content-wrapper {
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.leaflet-popup-content {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding: 6px 4px;
+    min-width: 200px;
+}
+
+.leaflet-popup-content b {
+    color: #0d47a1;
+    font-size: 1rem;
+}
+
+/* ===== CUSTOM MARKER (tuỳ chọn) ===== */
+.marker-custom {
+    background: #d32f2f;
+    border: 2px solid white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
