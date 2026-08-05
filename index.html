@@ -3,54 +3,73 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Ban do UBND TP.HCM - Mua He Xanh 2026</title>
+    <title>Bản đồ UBND TP.HCM - Mùa Hè Xanh 2026</title>
 
-    <!-- Leaflet CSS -->
+    <!-- CSS thư viện bên ngoài -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Leaflet LocateControl CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.83.1/dist/L.Control.Locate.min.css" />
-
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Leaflet LocateControl JS -->
-    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.83.1/dist/L.Control.Locate.min.js" charset="utf-8"></script>
-
-    <link rel="stylesheet" href="style.css" />
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.83.1/dist/L.Control.Locate.min.css" />
+    
+    <!-- CSS của bạn -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- JS Leaflet core và plugin -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.83.1/dist/L.Control.Locate.min.js" charset="utf-8"></script>
 </head>
 <body>
-    <!-- Dau trang -->
-    <div id="header">
-        <h1>Ban do UBND cac phuong moi TP.HCM</h1>
+
+    <!-- Đầu trang -->
+    <header id="header">
+        <h1>Bản đồ UBND các phường mới TP.HCM</h1>
         <div id="search-box">
-            <input type="text" id="searchInput" placeholder="Tim phuong..." />
-            <button id="searchBtn">Tim</button>
+            <input type="text" id="searchInput" placeholder="Nhập tên phường" />
+            <button id="searchBtn">Tìm</button>
         </div>
+    </header>
+
+    <!-- Hướng dẫn nhanh -->
+    <div id="quick-guide">
+        <span>Tìm phường | Chọn bán kính | Nhấn nút định vị để tìm UBND gần bạn</span>
     </div>
 
-    <!-- Lua chon ban kinh -->
+    <!-- Chọn bán kính -->
     <div id="radius-selector">
-        <span>Ban kinh tim:</span>
+        <span>Bán kính tìm:</span>
         <button class="radius-btn active" data-radius="5">5km</button>
         <button class="radius-btn" data-radius="10">10km</button>
         <button class="radius-btn" data-radius="15">15km</button>
     </div>
 
-    <!-- Vung hien thi danh sach goi y -->
+    <!-- Vùng gợi ý (mặc định ẩn) -->
     <div id="suggestions" style="display:none;">
-        <div><strong>Cac UBND gan ban (trong 5km):</strong></div>
+        <div id="suggestions-header">
+            <strong>Các UBND gần bạn (trong 5km):</strong>
+            <button id="closeSuggestions">x</button>
+        </div>
         <div id="suggestions-list"></div>
     </div>
 
-    <!-- Ban do -->
+    <!-- Bản đồ -->
     <div id="map"></div>
 
-    <!-- Chan trang -->
-    <div id="footer">
-        <span>2026 - Doi Mua He Xanh | Du lieu tu Nghi quyet 1685</span>
+    <!-- Chân trang -->
+<footer id="footer">
+    <div class="footer-content">
+        <div class="footer-logo">
+            <img src="Logo/SGU-LOGO.png" alt="Logo Đại học Sài Gòn" />
+            <span class="footer-divider">|</span>
+            <img src="Logo/logo-mua-he-xanh-vector-02 Background Removed.png" alt="Logo Mùa Hè Xanh" />
+        </div>
+        <div class="footer-text">
+            <span>Đội Bình Dân Học Vụ Số - Mùa Hè Xanh</span>
+            <span>Trường Đại học Sài Gòn</span>
+            <span>2026 - Dữ liệu từ Nghị quyết 1685</span>
+        </div>
     </div>
+</footer>
 
+    <!-- Script chính -->
     <script src="script.js"></script>
 </body>
 </html>
