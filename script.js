@@ -281,7 +281,7 @@ radiusBtns.forEach(function(btn) {
 });
 
 // Ve ranh gioi TP.HCM (mo rong bao gom ca Vung Tau, Binh Duong)
-const urlBoundary = 'data/hcm.geojson';
+const urlBoundary = 'data/hcm_new.geojson';
 
 
 fetch(urlBoundary)
