@@ -1,0 +1,389 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5786406,
+          10.8134875
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Vĩnh Lộc",
+        "Xa/Phuong truoc sap nhap": "Xã Vĩnh Lộc A và một phần xã Phạm Văn Hai",
+        "Dia chi chinh xac": "RH7H+9FR, Vĩnh Lộc, Hồ Chí Minh, Vietnam",
+        "So dien thoai": "02836220114"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5439375,
+          10.7746875
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Tân Vĩnh Lộc",
+        "Xa/Phuong truoc sap nhap": "Các xã Vĩnh Lộc B, một phần xã Phạm Văn Hai và một phần phường Tân Tạo",
+        "Dia chi chinh xac": "QGFV+VH Tan Vinh Loc, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5375625,
+          10.7774375
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Bình Lợi",
+        "Xa/Phuong truoc sap nhap": "Các xã Lê Minh Xuân, Bình Lợi",
+        "Dia chi chinh xac": "QGGQ+X2 Binh Loi, Ho Chi Minh, Vietnam",
+        "So dien thoai": "0987754321"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5844375,
+          10.6899375
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Tân Nhựt",
+        "Xa/Phuong truoc sap nhap": "Thị trấn Tân Túc, Xã Tân Nhựt, một phần phường Tân Tạo A, xã Tân Kiên và phường 16 (Quận 8)",
+        "Dia chi chinh xac": "MHQM+XQ Tan Nhut, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5665625,
+          10.6614375
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Bình Chánh",
+        "Xa/Phuong truoc sap nhap": "Các xã Tân Quý Tây, Bình Chánh, An Phú Tây",
+        "Dia chi chinh xac": "MH68+HJ Binh Chanh, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.6242436,
+          10.6502483
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Hưng Long",
+        "Xa/Phuong truoc sap nhap": "Các xã Đa Phước, Qui Đức, Hưng Long",
+        "Dia chi chinh xac": "CS1: MJ2F+2V Hung Long, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.6497969,
+          10.6486375
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "",
+        "Xa/Phuong truoc sap nhap": "",
+        "Dia chi chinh xac": "CS2: JJXX+FW3, Hưng Long, Hồ Chí Minh, Vietnam",
+        "So dien thoai": "0837691061"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.6548125,
+          10.7266875
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Bình Hưng",
+        "Xa/Phuong truoc sap nhap": "Các xã Phong Phú, xã Bình Hưng, một phần phường 7 (Quận 8)",
+        "Dia chi chinh xac": "PMG3+MW Binh Hung, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.7868906,
+          10.6438625
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Bình Khánh",
+        "Xa/Phuong truoc sap nhap": "Các xã Tam Thôn Hiệp, Bình Khánh, một phần xã An Thới Đông",
+        "Dia chi chinh xac": "JQVP+GQR, Bình Khánh, Hồ Chí Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.7893906,
+          10.5906625
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã An Thới Đông",
+        "Xa/Phuong truoc sap nhap": "Xã Lý Nhơn và một phần xã An Thới Đông",
+        "Dia chi chinh xac": "HQRQ+7Q6, An Thới Đông, Hồ Chí Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.9547101,
+          10.4109996
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Cần Giờ",
+        "Xa/Phuong truoc sap nhap": "Xã Long Hòa (huyện Cần Giờ), Thị trấn Cần Thạnh",
+        "Dia chi chinh xac": "CX63+GV9, Lương Văn Nho Giồng Ao, KP, Cần Giờ, Hồ Chí Minh, Vietnam",
+        "So dien thoai": "02838740595"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5398125,
+          10.9400625
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Củ Chi",
+        "Xa/Phuong truoc sap nhap": "Các xã Tân Phú Trung, Tân Thông Hội, Phước Vĩnh An",
+        "Dia chi chinh xac": "WGRQ+2W Cu Chi, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.4940781,
+          10.9733125
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Tân An Hội",
+        "Xa/Phuong truoc sap nhap": "Thị trấn Củ Chi, Xã Phước Hiệp, Xã Tân An Hội",
+        "Dia chi chinh xac": "XFFV+8JG, Tân An Hội, Hồ Chí Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.4322031,
+          11.0049125
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Thái Mỹ",
+        "Xa/Phuong truoc sap nhap": "Các xã Trung Lập Thượng, Phước Thạnh, Thái Mỹ",
+        "Dia chi chinh xac": "2C3J+XV8, Thái Mỹ, Hồ Chí Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5126875,
+          11.0875625
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã An Nhơn Tây",
+        "Xa/Phuong truoc sap nhap": "Các xã Phú Mỹ Hưng, An Phú, An Nhơn Tây",
+        "Dia chi chinh xac": "3GQ7+23 An Nhon Tay, Ho Chi Minh, Vietnam",
+        "So dien thoai": "02837948397"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.4870397,
+          11.0338858
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Nhuận Đức",
+        "Xa/Phuong truoc sap nhap": "Các xã Phạm Văn Cội, Trung Lập Hạ, Nhuận Đức",
+        "Dia chi chinh xac": "Nguyễn Thị Rành, Nhuận Đức, Hồ Chí Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5594375,
+          10.9844375
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Phú Hòa Đông",
+        "Xa/Phuong truoc sap nhap": "Các xã Tân Thạnh Tây, Tân Thạnh Đông, Phú Hòa Đông",
+        "Dia chi chinh xac": "XHM5+QQ Phu Hoa Dong, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.6164375,
+          10.9799375
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Bình Mỹ",
+        "Xa/Phuong truoc sap nhap": "Các xã Bình Mỹ (huyện Củ Chi), Hòa Phú, Trung An",
+        "Dia chi chinh xac": "XJH8+XH Binh My, Ho Chi Minh, Vietnam",
+        "So dien thoai": "02837976143"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5943125,
+          10.8880625
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Hóc Môn",
+        "Xa/Phuong truoc sap nhap": "Các xã Tân Hiệp (huyện Hóc Môn), Xã Tân Xuân, Thị trấn Hóc Môn",
+        "Dia chi chinh xac": "VHQV+6P Hoc Mon, Ho Chi Minh, Vietnam",
+        "So dien thoai": "02838831166"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5795625,
+          10.8754375
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Xuân Thới Sơn",
+        "Xa/Phuong truoc sap nhap": "Các xã Tân Thới Nhì, Xuân Thới Đông, Xuân Thới Sơn",
+        "Dia chi chinh xac": "VHGH+5R Xuan Thoi Son, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.5990625,
+          10.8401875
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Bà Điểm",
+        "Xa/Phuong truoc sap nhap": "Các xã Xuân Thới Thượng, Trung Chánh, Bà Điểm",
+        "Dia chi chinh xac": "RHRX+3J Ba Diem, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.7328125,
+          10.6745625
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Nhà Bè",
+        "Xa/Phuong truoc sap nhap": "Thị trấn Nhà Bè, Xã Phú Xuân, Xã Phước Kiến, Xã Phước Lộc",
+        "Dia chi chinh xac": "MPFM+R4 NHA Be, Ho Chi Minh, Vietnam",
+        "So dien thoai": "02837828119"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.7289375,
+          10.6561875
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Hiệp Phước",
+        "Xa/Phuong truoc sap nhap": "Các xã Nhơn Đức, Long Thới, Hiệp Phước",
+        "Dia chi chinh xac": "MP4H+FH Hiep Phuoc, Ho Chi Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          106.9752031,
+          10.4706625
+        ]
+      },
+      "properties": {
+        "Ten Phuong/Xa": "Xã Thạnh An",
+        "Xa/Phuong truoc sap nhap": "Không sáp nhập",
+        "Dia chi chinh xac": "FXCG+738, Thạnh Bình, Thạnh An, Hồ Chí Minh, Vietnam",
+        "So dien thoai": ""
+      }
+    }
+  ]
+}

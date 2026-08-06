@@ -37,7 +37,7 @@ var userLat = null;
 var userLng = null;
 var currentRadius = 5;
 
-var geoJsonUrl = 'data/ubnd_hcm_Mock.geojson';
+var geoJsonUrl = 'data/CacXaTPHCM.geojson';
 
 function removeVietnameseTones(str) {
     str = str.toLowerCase();
@@ -62,12 +62,15 @@ function removeVietnameseTones(str) {
 }
 
 function createMarker(feature, latlng) {
-    var ten = feature.properties['Ten Phuong/Xa'] || 'Chua co ten';
-    var quan = feature.properties['Quan/Huyen'] || 'Chua co quan';
-    var diaChi = feature.properties['Dia chi chinh xac'] || 'Chua co dia chi';
-    var sdt = feature.properties['So dien thoai'] || 'Chua cap nhat';
+    var ten = feature.properties['Ten Phuong/Xa'] || 'Chưa có tên';
+    var phongCu = feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin';
+    var diaChi = feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ';
+    var sdt = feature.properties['So dien thoai'] || 'Chưa cập nhật';
 
-    var popupContent = '<b>' + ten + '</b><br>' + quan + '<br>' + diaChi + '<br>' + sdt;
+    var popupContent = '<b>' + ten + '</b><br>' + 
+                       'Phường/xã cũ: ' + phongCu + '<br>' +
+                       diaChi + '<br>' +
+                       sdt;
 
     var govIcon = L.divIcon({
         className: 'marker-government',
@@ -84,7 +87,7 @@ function createMarker(feature, latlng) {
 fetch(geoJsonUrl)
     .then(function(response) {
         if (!response.ok) {
-            throw new Error('Khong tim thay file GeoJSON.');
+            throw new Error('Không tìm thấy file GeoJSON.');
         }
         return response.json();
     })
@@ -97,9 +100,9 @@ fetch(geoJsonUrl)
                 var marker = createMarker(feature, latlng);
                 allMarkers.push({
                     marker: marker,
-                    ten: feature.properties['Ten Phuong/Xa'] || 'Chua co ten',
-                    quan: feature.properties['Quan/Huyen'] || 'Chua co quan',
-                    diaChi: feature.properties['Dia chi chinh xac'] || 'Chua co dia chi',
+                    ten: feature.properties['Ten Phuong/Xa'] || 'Chưa có tên',
+                    phongCu: feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin',
+                    diaChi: feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ',
                     latlng: latlng
                 });
                 return marker;
@@ -107,10 +110,10 @@ fetch(geoJsonUrl)
         }).addTo(markerLayer);
 
         console.log('Đã tải ' + allMarkers.length + ' địa điểm.');
-        document.title = 'Bản đồ UBND TP.HCM (' + allMarkers.length + ' diem)';
+        document.title = 'Bản đồ UBND TP.HCM (' + allMarkers.length + ' điểm)';
     })
     .catch(function(error) {
-        console.error('Loi:', error);
+        console.error('Lỗi:', error);
     });
 
 var searchInput = document.getElementById('searchInput');
@@ -124,12 +127,12 @@ function hienThiKetQuaTimKiem(keyword) {
     for (var i = 0; i < allMarkers.length; i++) {
         var item = allMarkers[i];
         var tenNoAccent = removeVietnameseTones(item.ten);
-        var quanNoAccent = removeVietnameseTones(item.quan);
+        var phongCuNoAccent = removeVietnameseTones(item.phongCu);
 
-        if (tenNoAccent.includes(keywordNoAccent) || quanNoAccent.includes(keywordNoAccent)) {
+        if (tenNoAccent.includes(keywordNoAccent) || phongCuNoAccent.includes(keywordNoAccent)) {
             results.push({
                 ten: item.ten,
-                quan: item.quan,
+                phongCu: item.phongCu,
                 diaChi: item.diaChi,
                 latlng: item.latlng,
                 marker: item.marker,
@@ -154,7 +157,7 @@ function hienThiKetQuaTimKiem(keyword) {
     }
 
     if (results.length === 0) {
-        listDiv.innerHTML = '<div style="color:#888; padding:12px 0; text-align:center;">Không tìm thấy phường có tên "' + keyword + '"</div>';
+        listDiv.innerHTML = '<div style="color:#888; padding:12px 0; text-align:center;">Không tìm thấy phường/xã có tên "' + keyword + '"</div>';
         suggestionsContainer.style.display = 'block';
         if (footerElement) footerElement.style.display = 'none';
         return;
@@ -179,10 +182,10 @@ function hienThiKetQuaTimKiem(keyword) {
         info.innerHTML = '<strong>' + item.ten + '</strong><span style="font-size:0.8rem;color:#555;display:block;">' +
             item.diaChi + '</span>';
 
-        var quanSpan = document.createElement('span');
-        quanSpan.style.cssText = 'font-size:0.7rem;color:#888;display:block;';
-        quanSpan.textContent = item.quan;
-        info.appendChild(quanSpan);
+        var phongCuSpan = document.createElement('span');
+        phongCuSpan.style.cssText = 'font-size:0.7rem;color:#888;display:block;';
+        phongCuSpan.textContent = 'Phường/xã cũ: ' + item.phongCu;
+        info.appendChild(phongCuSpan);
 
         var link = document.createElement('span');
         link.className = 'suggestion-link';
@@ -212,7 +215,6 @@ function performSearch() {
     hienThiKetQuaTimKiem(keyword);
 }
 
-
 searchInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         performSearch();
@@ -239,7 +241,6 @@ if (closeSuggestionsBtn) {
         if (suggestionsContainer) {
             suggestionsContainer.style.display = 'none';
         }
-
         if (footerElement) {
             footerElement.style.display = 'block';
         }
@@ -250,7 +251,7 @@ if (closeSuggestionsBtn) {
 }
 
 map.on('locationfound', function(e) {
-    console.log('Da dinh vi tai:', e.latlng);
+    console.log('Đã định vị tại:', e.latlng);
     userLat = e.latlng.lat;
     userLng = e.latlng.lng;
     if (searchInput.value.trim() === '') {
@@ -259,7 +260,7 @@ map.on('locationfound', function(e) {
 });
 
 map.on('locationerror', function(e) {
-    console.warn('Khong the dinh vi:', e.message);
+    console.warn('Không thể định vị:', e.message);
 });
 
 function tinhKhoangCach(lat1, lon1, lat2, lon2) {
@@ -282,11 +283,11 @@ function hienThiGoiY(danhSach, banKinh) {
 
     var title = document.querySelector('#suggestions strong');
     if (title) {
-        title.textContent = 'Cac UBND gan ban (trong ' + banKinh + 'km):';
+        title.textContent = 'Các UBND gần bạn (trong ' + banKinh + 'km):';
     }
 
     if (danhSach.length === 0) {
-        listDiv.innerHTML = '<div style="color:#888; padding:8px 0;">Khong co UBND nao trong ban kinh ' + banKinh + 'km.</div>';
+        listDiv.innerHTML = '<div style="color:#888; padding:8px 0;">Không có UBND nào trong bán kính ' + banKinh + 'km.</div>';
         container.style.display = 'block';
         if (footerElement) footerElement.style.display = 'none';
         return;
@@ -351,7 +352,7 @@ function timUBNDGanDay(lat, lng, banKinh) {
         if (khoangCach <= banKinh) {
             ketQua.push({
                 ten: markerInfo.ten,
-                diaChi: markerInfo.diaChi || 'Chua co dia chi',
+                diaChi: markerInfo.diaChi || 'Chưa có địa chỉ',
                 khoangCach: khoangCach,
                 marker: markerInfo.marker,
                 lat: lat2,
@@ -378,7 +379,7 @@ radiusBtns.forEach(function(btn) {
         if (userLat !== null && userLng !== null) {
             timUBNDGanDay(userLat, userLng, radius);
         } else {
-            alert('Vui long dinh vi truoc khi tim kiem.');
+            alert('Vui lòng định vị trước khi tìm kiếm.');
         }
     });
 });
@@ -387,11 +388,11 @@ const urlBoundary = 'data/hcm_new.geojson';
 
 fetch(urlBoundary)
     .then(res => {
-        if (!res.ok) throw new Error('Khong the tai file ranh gioi.');
+        if (!res.ok) throw new Error('Không thể tải file ranh giới.');
         return res.json();
     })
     .then(data => {
-        console.log('Da tai du lieu ranh gioi thanh cong!');
+        console.log('Đã tải dữ liệu ranh giới thành công!');
 
         let worldCoords = [
             [-180, 90],
@@ -419,7 +420,7 @@ fetch(urlBoundary)
                 }
             });
         } else {
-            console.error("Cau truc file GeoJSON khong dung chuan FeatureCollection.");
+            console.error("Cấu trúc file GeoJSON không đúng chuẩn FeatureCollection.");
             return;
         }
 
@@ -453,10 +454,10 @@ fetch(urlBoundary)
 
         map.fitBounds(boundaryLayer.getBounds());
 
-        console.log('Da ve ranh gioi va tao vung mo ben ngoai thanh cong!');
+        console.log('Đã vẽ ranh giới và tạo vùng mờ bên ngoài thành công!');
     })
     .catch(error => {
-        console.error('Loi khi tai file ranh gioi: ', error);
+        console.error('Lỗi khi tải file ranh giới:', error);
     });
 
 map.on('dragstart', function() {
