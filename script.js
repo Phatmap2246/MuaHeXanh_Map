@@ -1,4 +1,4 @@
-// Khoi tao ban do voi gioi han TP.HCM
+// Khoi tao ban do
 var map = L.map('map', {
     maxBounds: [
         [10.0, 105.0],
@@ -10,13 +10,11 @@ var map = L.map('map', {
     attributionControl: false
 }).setView([10.7769, 106.7009], 11);
 
-// Map nen OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-// Nut dinh vi
 L.control.locate({
     position: 'topleft',
     strings: {
@@ -33,17 +31,36 @@ L.control.locate({
     }
 }).addTo(map);
 
-// Layer va bien toan cuc
 var markerLayer = L.layerGroup().addTo(map);
 var allMarkers = [];
 var userLat = null;
 var userLng = null;
 var currentRadius = 5;
 
-// Duong dan den file GeoJSON UBND
 var geoJsonUrl = 'data/ubnd_hcm_Mock.geojson';
 
-// Tao marker hinh toa nha chinh phu (su dung Font Awesome)
+function removeVietnameseTones(str) {
+    str = str.toLowerCase();
+    var map = {
+        'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+        'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+        'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+        'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+        'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+        'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+        'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+        'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+        'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+        'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+        'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+        'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+        'đ': 'd'
+    };
+    return str.replace(/[^a-z0-9\s]/g, function(ch) {
+        return map[ch] || ch;
+    });
+}
+
 function createMarker(feature, latlng) {
     var ten = feature.properties['Ten Phuong/Xa'] || 'Chua co ten';
     var quan = feature.properties['Quan/Huyen'] || 'Chua co quan';
@@ -64,7 +81,6 @@ function createMarker(feature, latlng) {
     return marker;
 }
 
-// Tai du lieu UBND
 fetch(geoJsonUrl)
     .then(function(response) {
         if (!response.ok) {
@@ -90,70 +106,162 @@ fetch(geoJsonUrl)
             }
         }).addTo(markerLayer);
 
-        console.log('Da tai ' + allMarkers.length + ' dia diem.');
-        document.title = 'Ban do UBND TP.HCM (' + allMarkers.length + ' diem)';
+        console.log('Đã tải ' + allMarkers.length + ' địa điểm.');
+        document.title = 'Bản đồ UBND TP.HCM (' + allMarkers.length + ' diem)';
     })
     .catch(function(error) {
         console.error('Loi:', error);
     });
 
-// Tim kiem phuong
 var searchInput = document.getElementById('searchInput');
-var searchBtn = document.getElementById('searchBtn');
+var suggestionsContainer = document.getElementById('suggestions');
+var footerElement = document.getElementById('footer');
 
-function performSearch() {
-    var keyword = searchInput.value.trim().toLowerCase();
-    if (!keyword) {
-        map.flyTo([10.7769, 106.7009], 11);
-        return;
-    }
+function hienThiKetQuaTimKiem(keyword) {
+    var keywordNoAccent = removeVietnameseTones(keyword);
+    var results = [];
 
     for (var i = 0; i < allMarkers.length; i++) {
         var item = allMarkers[i];
-        var ten = item.ten.toLowerCase();
-        var quan = item.quan.toLowerCase();
+        var tenNoAccent = removeVietnameseTones(item.ten);
+        var quanNoAccent = removeVietnameseTones(item.quan);
 
-        if (ten.includes(keyword) || quan.includes(keyword)) {
-            map.flyTo(item.latlng, 16);
-            item.marker.openPopup();
-            return;
+        if (tenNoAccent.includes(keywordNoAccent) || quanNoAccent.includes(keywordNoAccent)) {
+            results.push({
+                ten: item.ten,
+                quan: item.quan,
+                diaChi: item.diaChi,
+                latlng: item.latlng,
+                marker: item.marker,
+                lat: item.latlng.lat,
+                lng: item.latlng.lng
+            });
         }
     }
 
-    alert('Khong tim thay phuong nao co ten chua "' + keyword + '".');
+    var listDiv = document.getElementById('suggestions-list');
+    if (!listDiv) return;
+
+    listDiv.innerHTML = '';
+
+    var title = document.querySelector('#suggestions strong');
+    if (title) {
+        if (results.length > 0) {
+            title.textContent = 'Kết quả tìm kiếm "' + keyword + '" (' + results.length + '):';
+        } else {
+            title.textContent = 'Kết quả tìm kiếm "' + keyword + '":';
+        }
+    }
+
+    if (results.length === 0) {
+        listDiv.innerHTML = '<div style="color:#888; padding:12px 0; text-align:center;">Không tìm thấy phường có tên "' + keyword + '"</div>';
+        suggestionsContainer.style.display = 'block';
+        if (footerElement) footerElement.style.display = 'none';
+        return;
+    }
+
+    var soLuongHien = Math.min(results.length, 10);
+
+    for (var j = 0; j < soLuongHien; j++) {
+        var item = results[j];
+        var div = document.createElement('div');
+        div.className = 'suggestion-item';
+
+        div.onclick = (function(marker, latlng) {
+            return function() {
+                map.flyTo([latlng.lat, latlng.lng], 16);
+                marker.openPopup();
+            };
+        })(item.marker, item.latlng);
+
+        var info = document.createElement('div');
+        info.className = 'suggestion-info';
+        info.innerHTML = '<strong>' + item.ten + '</strong><span style="font-size:0.8rem;color:#555;display:block;">' +
+            item.diaChi + '</span>';
+
+        var quanSpan = document.createElement('span');
+        quanSpan.style.cssText = 'font-size:0.7rem;color:#888;display:block;';
+        quanSpan.textContent = item.quan;
+        info.appendChild(quanSpan);
+
+        var link = document.createElement('span');
+        link.className = 'suggestion-link';
+        link.textContent = 'Xem';
+
+        div.appendChild(info);
+        div.appendChild(link);
+        listDiv.appendChild(div);
+    }
+
+    suggestionsContainer.style.display = 'block';
+    if (footerElement) footerElement.style.display = 'none';
 }
 
-searchBtn.addEventListener('click', performSearch);
+function performSearch() {
+    var keyword = searchInput.value.trim();
+    if (!keyword) {
+        map.flyTo([10.7769, 106.7009], 11);
+        suggestionsContainer.style.display = 'none';
+        if (footerElement) footerElement.style.display = 'block';
+        if (userLat !== null && userLng !== null) {
+            timUBNDGanDay(userLat, userLng, currentRadius);
+        }
+        return;
+    }
+
+    hienThiKetQuaTimKiem(keyword);
+}
+
+
 searchInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         performSearch();
     }
 });
 
+searchInput.addEventListener('input', function() {
+    var keyword = this.value.trim();
+    if (keyword === '') {
+        suggestionsContainer.style.display = 'none';
+        if (footerElement) footerElement.style.display = 'block';
+        if (userLat !== null && userLng !== null) {
+            timUBNDGanDay(userLat, userLng, currentRadius);
+        }
+        return;
+    }
+    hienThiKetQuaTimKiem(keyword);
+});
+
 // Dong suggestions khi nhan nut X
 var closeSuggestionsBtn = document.getElementById('closeSuggestions');
 if (closeSuggestionsBtn) {
     closeSuggestionsBtn.addEventListener('click', function() {
-        var suggestionsContainer = document.getElementById('suggestions');
         if (suggestionsContainer) {
             suggestionsContainer.style.display = 'none';
+        }
+
+        if (footerElement) {
+            footerElement.style.display = 'block';
+        }
+        if (searchInput) {
+            searchInput.value = '';
         }
     });
 }
 
-// Xu ly su kien dinh vi
 map.on('locationfound', function(e) {
     console.log('Da dinh vi tai:', e.latlng);
     userLat = e.latlng.lat;
     userLng = e.latlng.lng;
-    timUBNDGanDay(userLat, userLng, currentRadius);
+    if (searchInput.value.trim() === '') {
+        timUBNDGanDay(userLat, userLng, currentRadius);
+    }
 });
 
 map.on('locationerror', function(e) {
     console.warn('Khong the dinh vi:', e.message);
 });
 
-// Tinh khoang cach Haversine (km)
 function tinhKhoangCach(lat1, lon1, lat2, lon2) {
     var R = 6371;
     var dLat = (lat2 - lat1) * Math.PI / 180;
@@ -165,7 +273,6 @@ function tinhKhoangCach(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
-// Hien thi danh sach goi y (click toan bo dong)
 function hienThiGoiY(danhSach, banKinh) {
     var listDiv = document.getElementById('suggestions-list');
     var container = document.getElementById('suggestions');
@@ -181,6 +288,7 @@ function hienThiGoiY(danhSach, banKinh) {
     if (danhSach.length === 0) {
         listDiv.innerHTML = '<div style="color:#888; padding:8px 0;">Khong co UBND nao trong ban kinh ' + banKinh + 'km.</div>';
         container.style.display = 'block';
+        if (footerElement) footerElement.style.display = 'none';
         return;
     }
 
@@ -195,7 +303,6 @@ function hienThiGoiY(danhSach, banKinh) {
         var div = document.createElement('div');
         div.className = 'suggestion-item';
 
-        // Click toan bo dong
         div.onclick = (function(marker, lat, lng) {
             return function() {
                 map.flyTo([lat, lng], 16);
@@ -203,13 +310,11 @@ function hienThiGoiY(danhSach, banKinh) {
             };
         })(item.marker, item.lat, item.lng);
 
-        // Thong tin
         var info = document.createElement('div');
         info.className = 'suggestion-info';
         info.innerHTML = '<strong>' + item.ten + '</strong><span style="font-size:0.8rem;color:#555;display:block;">' +
             item.diaChi + '</span>';
 
-        // Khoang cach
         var dist = document.createElement('span');
         dist.className = 'suggestion-distance';
         var km = item.khoangCach;
@@ -219,7 +324,6 @@ function hienThiGoiY(danhSach, banKinh) {
             dist.textContent = km.toFixed(1) + ' km';
         }
 
-        // Chu "Xem" chi hien thi, khong click duoc
         var link = document.createElement('span');
         link.className = 'suggestion-link';
         link.textContent = 'Xem';
@@ -231,9 +335,9 @@ function hienThiGoiY(danhSach, banKinh) {
     }
 
     container.style.display = 'block';
+    if (footerElement) footerElement.style.display = 'none';
 }
 
-// Tim cac UBND trong ban kinh
 function timUBNDGanDay(lat, lng, banKinh) {
     if (!banKinh) banKinh = 5;
     var ketQua = [];
@@ -259,7 +363,6 @@ function timUBNDGanDay(lat, lng, banKinh) {
     hienThiGoiY(ketQua, banKinh);
 }
 
-// Su kien chon ban kinh
 var radiusBtns = document.querySelectorAll('.radius-btn');
 
 radiusBtns.forEach(function(btn) {
@@ -280,9 +383,7 @@ radiusBtns.forEach(function(btn) {
     });
 });
 
-// Ve ranh gioi TP.HCM (mo rong bao gom ca Vung Tau, Binh Duong)
 const urlBoundary = 'data/hcm_new.geojson';
-
 
 fetch(urlBoundary)
     .then(res => {
@@ -292,7 +393,6 @@ fetch(urlBoundary)
     .then(data => {
         console.log('Da tai du lieu ranh gioi thanh cong!');
 
-        // Tao toa do mat na bao phu toan bo ban do
         let worldCoords = [
             [-180, 90],
             [180, 90],
@@ -303,13 +403,11 @@ fetch(urlBoundary)
         let maskCoordinates = [worldCoords];
         let allBoundaries = [];
 
-        // Kiem tra cau truc file
         if (data.type === "FeatureCollection" && data.features) {
             data.features.forEach(feature => {
                 let geom = feature.geometry;
                 allBoundaries.push(feature);
 
-                // Dao chieu inner ring de tao lo cho mat na
                 if (geom.type === 'MultiPolygon') {
                     geom.coordinates.forEach(poly => {
                         let reversedHole = [...poly[0]].reverse();
@@ -325,7 +423,6 @@ fetch(urlBoundary)
             return;
         }
 
-        // Ve vien do cho toan bo khu vuc ranh gioi
         const boundaryLayer = L.geoJSON(allBoundaries, {
             style: {
                 color: '#ff1744',
@@ -335,7 +432,6 @@ fetch(urlBoundary)
             interactive: false
         }).addTo(map);
 
-        // Phu mat na toi mau len ben ngoai ranh gioi
         const maskGeoJSON = {
             "type": "Feature",
             "geometry": {
@@ -355,7 +451,6 @@ fetch(urlBoundary)
             interactive: false
         }).addTo(map);
 
-        // Tu dong zoom vua khit voi ranh gioi
         map.fitBounds(boundaryLayer.getBounds());
 
         console.log('Da ve ranh gioi va tao vung mo ben ngoai thanh cong!');
@@ -363,3 +458,10 @@ fetch(urlBoundary)
     .catch(error => {
         console.error('Loi khi tai file ranh gioi: ', error);
     });
+
+map.on('dragstart', function() {
+    if (suggestionsContainer && suggestionsContainer.style.display === 'block') {
+        suggestionsContainer.style.display = 'none';
+        if (footerElement) footerElement.style.display = 'block';
+    }
+});
