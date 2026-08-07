@@ -28,10 +28,12 @@ L.control.locate({
 
 // 1. Khởi tạo MarkerClusterGroup thay vì LayerGroup thông thường
 var markersCluster = L.markerClusterGroup({
-    chunkedLoading: true, // Chia nhỏ quá trình tải dữ liệu để không treo trình duyệt
+    chunkedLoading: true, 
     spiderfyOnMaxZoom: true,
     showCoverageOnHover: false,
-    zoomToBoundsOnClick: true
+    zoomToBoundsOnClick: true,
+    disableClusteringAtZoom: 15,
+    maxClusterRadius: 40
 });
 
 map.addLayer(markersCluster); // Thêm cluster vào map
@@ -47,34 +49,53 @@ var searchInput = document.getElementById('searchInput');
 var suggestionsContainer = document.getElementById('suggestions');
 var footerElement = document.getElementById('footer');
 
+// --- HÀM ẨN/HIỆN MƯỢT MÀ BẰNG CSS CLASS ---
 function hideSuggestions() {
-    if (suggestionsContainer) suggestionsContainer.style.display = 'none';
-    if (footerElement) footerElement.style.display = 'block';
+    if (suggestionsContainer) {
+        
+        suggestionsContainer.classList.add('suggestions-hidden');
+        
+        
+        suggestionsContainer.style.display = ''; 
+        
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 400);
+    }
+
+    if (footerElement && typeof footerHidden !== 'undefined' && !footerHidden) {
+        footerElement.style.display = 'block';
+    }
 }
 
 function showSuggestions() {
-    if (suggestionsContainer) suggestionsContainer.style.display = 'block';
-    if (footerElement) footerElement.style.display = 'none';
+    if (suggestionsContainer) {
+        
+        suggestionsContainer.classList.remove('suggestions-hidden');
+        suggestionsContainer.style.display = ''; 
+        
+        suggestionsContainer.scrollTop = 0;
+    }
+    if (footerElement) {
+        footerElement.style.display = 'none';
+    }
 }
 
+// Hàm chuyển đổi tiếng Việt siêu mạnh (Chuẩn hóa tối đa)
 function removeVietnameseTones(str) {
+    if (!str) return "";
     str = str.toLowerCase();
-    var map = {
-        'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
-        'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
-        'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
-        'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
-        'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
-        'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
-        'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
-        'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
-        'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
-        'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
-        'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
-        'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
-        'đ': 'd'
-    };
-    return str.replace(/[^a-z0-9\s]/g, function(ch) { return map[ch] || ch; });
+    
+    // Xóa dấu tiếng Việt
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    str = str.replace(/đ/g, "d");
+
+    return str.replace(/[^a-z0-9]/g, ""); 
 }
 
 
@@ -160,10 +181,12 @@ fetch(geoJsonUrl)
 
 
 function hienThiKetQuaTimKiem(keyword) {
+   
     var keywordNoAccent = removeVietnameseTones(keyword);
     
    
     var results = allMarkers.filter(function(item) {
+        
         return item.tenKhongDau.includes(keywordNoAccent) || item.phongCuKhongDau.includes(keywordNoAccent);
     });
 
@@ -187,7 +210,7 @@ function hienThiKetQuaTimKiem(keyword) {
 
     
     var fragment = document.createDocumentFragment();
-    var soLuongHien = Math.min(results.length, 10);
+    var soLuongHien = results.length;
 
     for (var j = 0; j < soLuongHien; j++) {
         var item = results[j];
@@ -196,17 +219,16 @@ function hienThiKetQuaTimKiem(keyword) {
 
         div.onclick = (function(marker, latlng) {
             return function() {
-            
-                markersCluster.zoomToShowLayer(marker, function() {
-                    
-                    map.flyTo([latlng.lat, latlng.lng], 16, { 
-                        animate: true, 
-                        duration: 1.5 
-                    });
-                    
-                    marker.openPopup();
+                
+                map.setView([latlng.lat, latlng.lng], 16, { 
+                    animate: true, 
+                    duration: 1.5 
                 });
-                hideSuggestions();
+                
+                
+                setTimeout(function() { 
+                    marker.openPopup(); 
+                }, 800);
             };
         })(item.marker, item.latlng);
 
@@ -259,7 +281,7 @@ searchInput.addEventListener('input', function() {
         return;
     }
     
-    // Đợi 300ms sau khi ngừng gõ mới chạy tìm kiếm
+    // Đợi 80ms sau khi ngừng gõ mới chạy tìm kiếm
     searchTimeout = setTimeout(function() {
         hienThiKetQuaTimKiem(keyword);
     }, 80);
@@ -309,7 +331,7 @@ function hienThiGoiY(danhSach, banKinh) {
     danhSach.sort((a, b) => a.khoangCach - b.khoangCach);
     
     var fragment = document.createDocumentFragment();
-    var soLuongHien = Math.min(danhSach.length, 10);
+    var soLuongHien = danhSach.length;
 
     for (var i = 0; i < soLuongHien; i++) {
         var item = danhSach[i];
@@ -317,14 +339,15 @@ function hienThiGoiY(danhSach, banKinh) {
         div.className = 'suggestion-item';
         div.onclick = (function(marker, lat, lng) {
             return function() {
-                markersCluster.zoomToShowLayer(marker, function() {
-                    map.flyTo([lat, lng], 16, { 
-                        animate: true, 
-                        duration: 1.5 
-                    });
-                    marker.openPopup();
+               
+                map.setView([lat, lng], 16, { 
+                    animate: true, 
+                    duration: 1.5 
                 });
-                hideSuggestions();
+                
+                setTimeout(function() { 
+                    marker.openPopup(); 
+                }, 800);
             };
         })(item.marker, item.lat, item.lng);
 
@@ -424,11 +447,15 @@ fetch(urlBoundary)
     })
     .catch(error => console.error('Lỗi khi tải file ranh giới:', error));
 
-map.on('dragend', function() {
-    if (suggestionsContainer && suggestionsContainer.style.display === 'block') hideSuggestions();
+
+// Thêm 'dragstart' để bắt chuẩn xác 100% hành động vuốt/kéo bản đồ
+map.on('mousedown touchstart dragstart wheel', function() {
+    if (suggestionsContainer && !suggestionsContainer.classList.contains('suggestions-hidden')) {
+        hideSuggestions();
+    }
 });
 
-hideSuggestions();
+
 
 
 var footerHidden = false;
@@ -451,3 +478,24 @@ function enableAutoHide() {
     map.on('dragstart zoomstart click touchstart', performFooterHide);
 }
 setTimeout(enableAutoHide, 1000);
+
+// --- TÍNH NĂNG ẨN/HIỆN TOÀN BỘ MARKER THEO MỨC ĐỘ ZOOM ---
+var zoomHienMarker = 14; 
+
+function kiemTraHienThiMarker() {
+    var mapDOM = map.getContainer(); 
+    
+    // Nếu zoom nhỏ hơn ngưỡng -> Thêm class tàng hình vào bản đồ
+    if (map.getZoom() < zoomHienMarker) {
+        mapDOM.classList.add('hide-our-markers');
+    } else {
+        // Nếu zoom lớn hơn hoặc bằng ngưỡng -> Gỡ tàng hình
+        mapDOM.classList.remove('hide-our-markers');
+    }
+}
+
+// 1. Chạy hàm kiểm tra ngay khi vừa load web xong
+kiemTraHienThiMarker();
+
+// 2. Lắng nghe sự kiện: Mỗi khi người dùng cuộn chuột/vuốt zoom xong
+map.on('zoomend', kiemTraHienThiMarker);
