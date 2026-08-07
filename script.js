@@ -1,4 +1,4 @@
-// Khoi tao ban do
+// Khởi tạo bản đồ
 var map = L.map('map', {
     maxBounds: [
         [10.0, 105.0],
@@ -7,6 +7,7 @@ var map = L.map('map', {
     maxBoundsViscosity: 1.0,
     minZoom: 10,
     maxZoom: 19,
+    preferCanvas: true, // Tối ưu render: Dùng Canvas thay vì SVG/DOM Elements để vẽ đường thẳng/mặt nạ
     attributionControl: false
 }).setView([10.7769, 106.7009], 11);
 
@@ -17,27 +18,44 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 L.control.locate({
     position: 'topleft',
-    strings: {
-        title: 'Xem vi tri cua toi'
-    },
+    strings: { title: 'Xem vi tri cua toi' },
     setView: 'once',
     drawCircle: true,
     follow: true,
     stopFollowingOnDrag: true,
-    circleStyle: {
-        color: '#d32f2f',
-        weight: 2,
-        opacity: 0.5
-    }
+    circleStyle: { color: '#d32f2f', weight: 2, opacity: 0.5 }
 }).addTo(map);
 
-var markerLayer = L.layerGroup().addTo(map);
+// 1. Khởi tạo MarkerClusterGroup thay vì LayerGroup thông thường
+var markersCluster = L.markerClusterGroup({
+    chunkedLoading: true, // Chia nhỏ quá trình tải dữ liệu để không treo trình duyệt
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true
+});
+
+map.addLayer(markersCluster); // Thêm cluster vào map
 var allMarkers = [];
 var userLat = null;
 var userLng = null;
 var currentRadius = 5;
 
 var geoJsonUrl = 'data/DuLieuBanDo_CapNhat.geojson';
+
+// DOM elements
+var searchInput = document.getElementById('searchInput');
+var suggestionsContainer = document.getElementById('suggestions');
+var footerElement = document.getElementById('footer');
+
+function hideSuggestions() {
+    if (suggestionsContainer) suggestionsContainer.style.display = 'none';
+    if (footerElement) footerElement.style.display = 'block';
+}
+
+function showSuggestions() {
+    if (suggestionsContainer) suggestionsContainer.style.display = 'block';
+    if (footerElement) footerElement.style.display = 'none';
+}
 
 function removeVietnameseTones(str) {
     str = str.toLowerCase();
@@ -56,124 +74,119 @@ function removeVietnameseTones(str) {
         'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
         'đ': 'd'
     };
-    return str.replace(/[^a-z0-9\s]/g, function(ch) {
-        return map[ch] || ch;
-    });
+    return str.replace(/[^a-z0-9\s]/g, function(ch) { return map[ch] || ch; });
 }
 
+
+var pinHTML = '<div class="gg-pin"></div>'; 
+var pinIcon = L.divIcon({
+    className: 'custom-layer', 
+    html: pinHTML,
+    iconSize: [30, 30],
+    iconAnchor: [15, 36],
+    popupAnchor: [0, -36]
+});
+
+
+
 function createMarker(feature, latlng) {
-    var ten = feature.properties['Ten Phuong/Xa'] || 'Chưa có tên';
-    var phongCu = feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin';
-    var diaChi = feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ';
-    var sdt = feature.properties['So dien thoai'] || 'Chưa cập nhật';
-
-    var popupContent = '<div style="font-size:0.95rem; line-height:1.6;">' +
-                   '<b style="font-size:1.1rem; color:#1b5e20;">' + ten + '</b><br>' +
-                   '<b>Phường/xã cũ:</b> ' + phongCu + '<br>' +
-                   '<b>Địa chỉ mới:</b> ' + diaChi + '<br>' +
-                   '<b>Số điện thoại:</b> ' + sdt +
-                   '</div>';
-
-    var pinHTML = `
-        <div class="marker-pin">
-            <div class="pin-head">
-                <i class="fas fa-landmark"></i>
-            </div>
-            <div class="pin-tail"></div>
+    var tenXa = feature.properties['Ten Phuong/Xa'] || 'UBND Xã';
+    var popupContent = '<b>' + tenXa + '</b><br>' + 
+                       '<b>Phường/xã cũ</b>: ' + (feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin') + '<br>' +
+                       '<b>Địa chỉ mới: </b>' + (feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ') + '<br>' +
+                       '<b>Số điện thoại: </b>' + (feature.properties['So dien thoai'] || 'Chưa cập nhật');
+    var combinedHTML = `
+        <div class="marker-with-label">
+            <div class="gg-pin"></div>
+            <span class="pin-label">${tenXa}</span>
         </div>
     `;
-
-    var pinIcon = L.divIcon({
-        className: '',
-        html: pinHTML,
-        iconSize: [40, 56],
-        iconAnchor: [20, 56],   
-        popupAnchor: [0, -56]    
+    var labelIcon = L.divIcon({
+        className: 'custom-layer', 
+        html: combinedHTML,
+        
+        
+        iconSize: [0, 0], 
+        
+        iconAnchor: [13, 13], 
+        
+    
+        popupAnchor: [0, -15] 
     });
 
-    var marker = L.marker(latlng, { icon: pinIcon }).bindPopup(popupContent);
+    var marker = L.marker(latlng, { icon: labelIcon }).bindPopup(popupContent);
     return marker;
 }
 
+// Tải dữ liệu UBND
 fetch(geoJsonUrl)
-    .then(function(response) {
-        if (!response.ok) {
-            throw new Error('Không tìm thấy file GeoJSON.');
-        }
+    .then(response => {
+        if (!response.ok) throw new Error('Không tìm thấy file GeoJSON.');
         return response.json();
     })
-    .then(function(data) {
-        markerLayer.clearLayers();
+    .then(data => {
+        markersCluster.clearLayers();
         allMarkers = [];
 
         L.geoJSON(data, {
             pointToLayer: function(feature, latlng) {
                 var marker = createMarker(feature, latlng);
+                var ten = feature.properties['Ten Phuong/Xa'] || 'Chưa có tên';
+                var phongCu = feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin';
+                
                 allMarkers.push({
                     marker: marker,
-                    ten: feature.properties['Ten Phuong/Xa'] || 'Chưa có tên',
-                    phongCu: feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin',
+                    ten: ten,
+                    phongCu: phongCu,
                     diaChi: feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ',
-                    latlng: latlng
+                    latlng: latlng,
+                    
+                    tenKhongDau: removeVietnameseTones(ten),
+                    phongCuKhongDau: removeVietnameseTones(phongCu) 
                 });
-                return marker;
+                return marker; 
+            },
+            onEachFeature: function(feature, layer) {
+                
+                markersCluster.addLayer(layer);
             }
-        }).addTo(markerLayer);
+        }); 
 
         console.log('Đã tải ' + allMarkers.length + ' địa điểm.');
         document.title = 'Bản đồ UBND TP.HCM (' + allMarkers.length + ' điểm)';
+        hideSuggestions();
     })
-    .catch(function(error) {
-        console.error('Lỗi:', error);
-    });
+    .catch(error => console.error('Lỗi:', error));
 
-var searchInput = document.getElementById('searchInput');
-var suggestionsContainer = document.getElementById('suggestions');
-var footerElement = document.getElementById('footer');
 
 function hienThiKetQuaTimKiem(keyword) {
     var keywordNoAccent = removeVietnameseTones(keyword);
-    var results = [];
-
-    for (var i = 0; i < allMarkers.length; i++) {
-        var item = allMarkers[i];
-        var tenNoAccent = removeVietnameseTones(item.ten);
-        var phongCuNoAccent = removeVietnameseTones(item.phongCu);
-
-        if (tenNoAccent.includes(keywordNoAccent) || phongCuNoAccent.includes(keywordNoAccent)) {
-            results.push({
-                ten: item.ten,
-                phongCu: item.phongCu,
-                diaChi: item.diaChi,
-                latlng: item.latlng,
-                marker: item.marker,
-                lat: item.latlng.lat,
-                lng: item.latlng.lng
-            });
-        }
-    }
+    
+   
+    var results = allMarkers.filter(function(item) {
+        return item.tenKhongDau.includes(keywordNoAccent) || item.phongCuKhongDau.includes(keywordNoAccent);
+    });
 
     var listDiv = document.getElementById('suggestions-list');
     if (!listDiv) return;
 
     listDiv.innerHTML = '';
-
     var title = document.querySelector('#suggestions strong');
+    
     if (title) {
-        if (results.length > 0) {
-            title.textContent = 'Kết quả tìm kiếm "' + keyword + '" (' + results.length + '):';
-        } else {
-            title.textContent = 'Kết quả tìm kiếm "' + keyword + '":';
-        }
+        title.textContent = results.length > 0 
+            ? 'Kết quả tìm kiếm "' + keyword + '" (' + results.length + '):' 
+            : 'Kết quả tìm kiếm "' + keyword + '":';
     }
 
     if (results.length === 0) {
         listDiv.innerHTML = '<div style="color:#888; padding:12px 0; text-align:center;">Không tìm thấy phường/xã có tên "' + keyword + '"</div>';
-        suggestionsContainer.style.display = 'block';
-        if (footerElement) footerElement.style.display = 'none';
+        showSuggestions();
         return;
     }
 
+    
+    var fragment = document.createDocumentFragment();
     var soLuongHien = Math.min(results.length, 10);
 
     for (var j = 0; j < soLuongHien; j++) {
@@ -183,86 +196,85 @@ function hienThiKetQuaTimKiem(keyword) {
 
         div.onclick = (function(marker, latlng) {
             return function() {
-                map.flyTo([latlng.lat, latlng.lng], 16);
-                marker.openPopup();
+            
+                markersCluster.zoomToShowLayer(marker, function() {
+                    
+                    map.flyTo([latlng.lat, latlng.lng], 16, { 
+                        animate: true, 
+                        duration: 1.5 
+                    });
+                    
+                    marker.openPopup();
+                });
+                hideSuggestions();
             };
         })(item.marker, item.latlng);
 
-        var info = document.createElement('div');
-        info.className = 'suggestion-info';
-        info.innerHTML = '<strong>' + item.ten + '</strong><span style="font-size:0.8rem;color:#555;display:block;">' +
-            item.diaChi + '</span>';
-
-        var phongCuSpan = document.createElement('span');
-        phongCuSpan.style.cssText = 'font-size:0.7rem;color:#888;display:block;';
-        phongCuSpan.textContent = 'Phường/xã cũ: ' + item.phongCu;
-        info.appendChild(phongCuSpan);
-
-        var link = document.createElement('span');
-        link.className = 'suggestion-link';
-        link.textContent = 'Xem';
-
-        div.appendChild(info);
-        div.appendChild(link);
-        listDiv.appendChild(div);
+        div.innerHTML = `
+            <div class="suggestion-info">
+                <strong>${item.ten}</strong>
+                <span style="font-size:0.8rem;color:#555;display:block;">${item.diaChi}</span>
+                <span style="font-size:0.7rem;color:#888;display:block;">Phường/xã cũ: ${item.phongCu}</span>
+            </div>
+            <span class="suggestion-link">Xem</span>
+        `;
+        fragment.appendChild(div);
     }
-
-    suggestionsContainer.style.display = 'block';
-    if (footerElement) footerElement.style.display = 'none';
+    
+    listDiv.appendChild(fragment);
+    showSuggestions();
 }
 
+
+var searchTimeout;
 function performSearch() {
     var keyword = searchInput.value.trim();
     if (!keyword) {
         map.flyTo([10.7769, 106.7009], 11);
-        suggestionsContainer.style.display = 'none';
-        if (footerElement) footerElement.style.display = 'block';
+        hideSuggestions();
         if (userLat !== null && userLng !== null) {
             timUBNDGanDay(userLat, userLng, currentRadius);
         }
         return;
     }
-
     hienThiKetQuaTimKiem(keyword);
 }
 
 searchInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
+        clearTimeout(searchTimeout);
         performSearch();
     }
 });
 
 searchInput.addEventListener('input', function() {
     var keyword = this.value.trim();
+    clearTimeout(searchTimeout);
+    
     if (keyword === '') {
-        suggestionsContainer.style.display = 'none';
-        if (footerElement) footerElement.style.display = 'block';
+        hideSuggestions();
         if (userLat !== null && userLng !== null) {
             timUBNDGanDay(userLat, userLng, currentRadius);
         }
         return;
     }
-    hienThiKetQuaTimKiem(keyword);
+    
+    // Đợi 300ms sau khi ngừng gõ mới chạy tìm kiếm
+    searchTimeout = setTimeout(function() {
+        hienThiKetQuaTimKiem(keyword);
+    }, 80);
 });
 
-// Dong suggestions khi nhan nut X
 var closeSuggestionsBtn = document.getElementById('closeSuggestions');
 if (closeSuggestionsBtn) {
     closeSuggestionsBtn.addEventListener('click', function() {
-        if (suggestionsContainer) {
-            suggestionsContainer.style.display = 'none';
-        }
-        if (footerElement) {
-            footerElement.style.display = 'block';
-        }
-        if (searchInput) {
-            searchInput.value = '';
-        }
+        hideSuggestions();
+        if (searchInput) searchInput.value = '';
     });
 }
 
+// Xử lý định vị và khoảng cách
 map.on('locationfound', function(e) {
-    console.log('Đã định vị tại:', e.latlng);
     userLat = e.latlng.lat;
     userLng = e.latlng.lng;
     if (searchInput.value.trim() === '') {
@@ -270,90 +282,73 @@ map.on('locationfound', function(e) {
     }
 });
 
-map.on('locationerror', function(e) {
-    console.warn('Không thể định vị:', e.message);
-});
+map.on('locationerror', function(e) { console.warn('Không thể định vị:', e.message); });
 
 function tinhKhoangCach(lat1, lon1, lat2, lon2) {
     var R = 6371;
     var dLat = (lat2 - lat1) * Math.PI / 180;
     var dLon = (lon2 - lon1) * Math.PI / 180;
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
 function hienThiGoiY(danhSach, banKinh) {
     var listDiv = document.getElementById('suggestions-list');
-    var container = document.getElementById('suggestions');
     if (!listDiv) return;
-
     listDiv.innerHTML = '';
-
+    
     var title = document.querySelector('#suggestions strong');
-    if (title) {
-        title.textContent = 'Các UBND gần bạn (trong ' + banKinh + 'km):';
-    }
+    if (title) title.textContent = 'Các UBND gần bạn (trong ' + banKinh + 'km):';
 
     if (danhSach.length === 0) {
         listDiv.innerHTML = '<div style="color:#888; padding:8px 0;">Không có UBND nào trong bán kính ' + banKinh + 'km.</div>';
-        container.style.display = 'block';
-        if (footerElement) footerElement.style.display = 'none';
+        showSuggestions();
         return;
     }
 
-    danhSach.sort(function(a, b) {
-        return a.khoangCach - b.khoangCach;
-    });
-
+    danhSach.sort((a, b) => a.khoangCach - b.khoangCach);
+    
+    var fragment = document.createDocumentFragment();
     var soLuongHien = Math.min(danhSach.length, 10);
 
     for (var i = 0; i < soLuongHien; i++) {
         var item = danhSach[i];
         var div = document.createElement('div');
         div.className = 'suggestion-item';
-
         div.onclick = (function(marker, lat, lng) {
             return function() {
-                map.flyTo([lat, lng], 16);
-                marker.openPopup();
+                markersCluster.zoomToShowLayer(marker, function() {
+                    map.flyTo([lat, lng], 16, { 
+                        animate: true, 
+                        duration: 1.5 
+                    });
+                    marker.openPopup();
+                });
+                hideSuggestions();
             };
         })(item.marker, item.lat, item.lng);
 
-        var info = document.createElement('div');
-        info.className = 'suggestion-info';
-        info.innerHTML = '<strong>' + item.ten + '</strong><span style="font-size:0.8rem;color:#555;display:block;">' +
-            item.diaChi + '</span>';
-
-        var dist = document.createElement('span');
-        dist.className = 'suggestion-distance';
-        var km = item.khoangCach;
-        if (km < 1) {
-            dist.textContent = (km * 1000).toFixed(0) + ' m';
-        } else {
-            dist.textContent = km.toFixed(1) + ' km';
-        }
-
-        var link = document.createElement('span');
-        link.className = 'suggestion-link';
-        link.textContent = 'Xem';
-
-        div.appendChild(info);
-        div.appendChild(dist);
-        div.appendChild(link);
-        listDiv.appendChild(div);
+        var distStr = item.khoangCach < 1 ? (item.khoangCach * 1000).toFixed(0) + ' m' : item.khoangCach.toFixed(1) + ' km';
+        
+        div.innerHTML = `
+            <div class="suggestion-info">
+                <strong>${item.ten}</strong>
+                <span style="font-size:0.8rem;color:#555;display:block;">${item.diaChi}</span>
+            </div>
+            <span class="suggestion-distance">${distStr}</span>
+            <span class="suggestion-link">Xem</span>
+        `;
+        fragment.appendChild(div);
     }
-
-    container.style.display = 'block';
-    if (footerElement) footerElement.style.display = 'none';
+    
+    listDiv.appendChild(fragment);
+    showSuggestions();
 }
 
 function timUBNDGanDay(lat, lng, banKinh) {
     if (!banKinh) banKinh = 5;
     var ketQua = [];
-
+    
     for (var i = 0; i < allMarkers.length; i++) {
         var markerInfo = allMarkers[i];
         var lat2 = markerInfo.latlng.lat;
@@ -371,47 +366,32 @@ function timUBNDGanDay(lat, lng, banKinh) {
             });
         }
     }
-
     hienThiGoiY(ketQua, banKinh);
 }
 
 var radiusBtns = document.querySelectorAll('.radius-btn');
-
 radiusBtns.forEach(function(btn) {
     btn.addEventListener('click', function() {
-        radiusBtns.forEach(function(b) {
-            b.classList.remove('active');
-        });
+        radiusBtns.forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-
-        var radius = parseFloat(this.getAttribute('data-radius'));
-        currentRadius = radius;
-
+        currentRadius = parseFloat(this.getAttribute('data-radius'));
         if (userLat !== null && userLng !== null) {
-            timUBNDGanDay(userLat, userLng, radius);
+            timUBNDGanDay(userLat, userLng, currentRadius);
         } else {
             alert('Vui lòng định vị trước khi tìm kiếm.');
         }
     });
 });
 
+// Vẽ ranh giới mượt mà hơn với preferCanvas đã bật ở phần khởi tạo L.map
 const urlBoundary = 'data/hcm_new.geojson';
-
 fetch(urlBoundary)
     .then(res => {
         if (!res.ok) throw new Error('Không thể tải file ranh giới.');
         return res.json();
     })
     .then(data => {
-        console.log('Đã tải dữ liệu ranh giới thành công!');
-
-        let worldCoords = [
-            [-180, 90],
-            [180, 90],
-            [180, -90],
-            [-180, -90],
-            [-180, 90]
-        ];
+        let worldCoords = [[-180, 90], [180, 90], [180, -90], [-180, -90], [-180, 90]];
         let maskCoordinates = [worldCoords];
         let allBoundaries = [];
 
@@ -419,61 +399,55 @@ fetch(urlBoundary)
             data.features.forEach(feature => {
                 let geom = feature.geometry;
                 allBoundaries.push(feature);
-
                 if (geom.type === 'MultiPolygon') {
-                    geom.coordinates.forEach(poly => {
-                        let reversedHole = [...poly[0]].reverse();
-                        maskCoordinates.push(reversedHole);
-                    });
+                    geom.coordinates.forEach(poly => { maskCoordinates.push([...poly[0]].reverse()); });
                 } else if (geom.type === 'Polygon') {
-                    let reversedHole = [...geom.coordinates[0]].reverse();
-                    maskCoordinates.push(reversedHole);
+                    maskCoordinates.push([...geom.coordinates[0]].reverse());
                 }
             });
-        } else {
-            console.error("Cấu trúc file GeoJSON không đúng chuẩn FeatureCollection.");
-            return;
         }
 
         const boundaryLayer = L.geoJSON(allBoundaries, {
-            style: {
-                color: '#ff1744',
-                weight: 2,
-                fillOpacity: 0
-            },
+            style: { color: '#ff1744', weight: 2, fillOpacity: 0 },
             interactive: false
         }).addTo(map);
 
-        const maskGeoJSON = {
+        L.geoJSON({
             "type": "Feature",
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": maskCoordinates
-            }
-        };
-
-        L.geoJSON(maskGeoJSON, {
-            style: {
-                color: 'transparent',
-                fillColor: '#1a1a2e',
-                fillOpacity: 0.7,
-                fillRule: 'evenodd',
-                className: 'map-mask'
-            },
+            "geometry": { "type": "Polygon", "coordinates": maskCoordinates }
+        }, {
+            style: { color: 'transparent', fillColor: '#1a1a2e', fillOpacity: 0.7, fillRule: 'evenodd', className: 'map-mask' },
             interactive: false
         }).addTo(map);
 
         map.fitBounds(boundaryLayer.getBounds());
-
-        console.log('Đã vẽ ranh giới và tạo vùng mờ bên ngoài thành công!');
     })
-    .catch(error => {
-        console.error('Lỗi khi tải file ranh giới:', error);
-    });
+    .catch(error => console.error('Lỗi khi tải file ranh giới:', error));
 
-map.on('dragstart', function() {
-    if (suggestionsContainer && suggestionsContainer.style.display === 'block') {
-        suggestionsContainer.style.display = 'none';
-        if (footerElement) footerElement.style.display = 'block';
-    }
+map.on('dragend', function() {
+    if (suggestionsContainer && suggestionsContainer.style.display === 'block') hideSuggestions();
 });
+
+hideSuggestions();
+
+
+var footerHidden = false;
+
+
+function performFooterHide() {
+    if (!footerHidden && footerElement) {
+        footerElement.classList.add('footer-hidden');
+        footerHidden = true;
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 400);
+        map.off('dragstart zoomstart click touchstart', performFooterHide);
+        console.log("Footer đã được ẩn vĩnh viễn.");
+    }
+}
+
+
+function enableAutoHide() {
+    map.on('dragstart zoomstart click touchstart', performFooterHide);
+}
+setTimeout(enableAutoHide, 1000);
