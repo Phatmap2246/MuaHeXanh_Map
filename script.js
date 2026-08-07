@@ -50,6 +50,10 @@ var geoJsonUrl = 'data/DuLieuBanDo_CapNhat.geojson';
 var searchInput = document.getElementById('searchInput');
 var suggestionsContainer = document.getElementById('suggestions');
 var footerElement = document.getElementById('footer');
+if (suggestionsContainer) {
+    L.DomEvent.disableScrollPropagation(suggestionsContainer);
+    L.DomEvent.disableClickPropagation(suggestionsContainer);
+}
 
 // --- HÀM ẨN/HIỆN MƯỢT MÀ BẰNG CSS CLASS ---
 function hideSuggestions() {
@@ -75,8 +79,6 @@ function showSuggestions() {
         
         suggestionsContainer.classList.remove('suggestions-hidden');
         suggestionsContainer.style.display = ''; 
-        
-        suggestionsContainer.scrollTop = 0;
     }
     if (footerElement) {
         footerElement.style.display = 'none';
