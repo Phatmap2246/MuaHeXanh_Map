@@ -1261,7 +1261,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Vĩnh Lộc",
         "Xa/Phuong truoc sap nhap": "Xã Vĩnh Lộc A và một phần xã Phạm Văn Hai",
-        "Dia chi chinh xac": "RH7H+9FR, Vĩnh Lộc, Hồ Chí Minh, Vietnam",
+        "Dia chi chinh xac": "F7/16 Vĩnh Lộc, xã Vĩnh Lộc, TP Hồ Chí Minh",
         "So dien thoai": "02836220114"
       }
     },
@@ -1277,7 +1277,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Tân Vĩnh Lộc",
         "Xa/Phuong truoc sap nhap": "Các xã Vĩnh Lộc B, một phần xã Phạm Văn Hai và một phần phường Tân Tạo",
-        "Dia chi chinh xac": "QGFV+VH Tan Vinh Loc, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "2026 Trần Văn Giàu, Tân Vĩnh Lộc, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1293,7 +1293,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Bình Lợi",
         "Xa/Phuong truoc sap nhap": "Các xã Lê Minh Xuân, Bình Lợi",
-        "Dia chi chinh xac": "QGGQ+X2 Binh Loi, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "1905 Trần Văn Giàu, Bình Lợi, Hồ Chí Minh, Vietnam",
         "So dien thoai": "0987754321"
       }
     },
@@ -1309,7 +1309,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Tân Nhựt",
         "Xa/Phuong truoc sap nhap": "Thị trấn Tân Túc, Xã Tân Nhựt, một phần phường Tân Tạo A, xã Tân Kiên và phường 16 (Quận 8)",
-        "Dia chi chinh xac": "MHQM+XQ Tan Nhut, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "79 Đ. Tân Túc, Tân Nhựt, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1325,7 +1325,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Bình Chánh",
         "Xa/Phuong truoc sap nhap": "Các xã Tân Quý Tây, Bình Chánh, An Phú Tây",
-        "Dia chi chinh xac": "MH68+HJ Binh Chanh, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "345 Trịnh Như Khuê, Bình Chánh, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1341,7 +1341,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Hưng Long CS1",
         "Xa/Phuong truoc sap nhap": "Các xã Đa Phước, Qui Đức, Hưng Long",
-        "Dia chi chinh xac": "CS1: MJ2F+2V Hung Long, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "564 Đoàn Nguyễn Tuấn, Hưng Long, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1357,7 +1357,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Hưng Long CS2",
         "Xa/Phuong truoc sap nhap": "Các xã Đa Phước, Qui Đức, Hưng Long",
-        "Dia chi chinh xac": "CS2: JJXX+FW3, Hưng Long, Hồ Chí Minh, Vietnam",
+        "Dia chi chinh xac": "B3/24 ấp 2, xã Hưng Long, Hồ Chí Minh",
         "So dien thoai": "0837691061"
       }
     },
@@ -1373,7 +1373,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Bình Hưng",
         "Xa/Phuong truoc sap nhap": "Các xã Phong Phú, xã Bình Hưng, một phần phường 7 (Quận 8)",
-        "Dia chi chinh xac": "PMG3+MW Binh Hung, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "10 Đ. Số 10, khu Dân Cư, Bình Hưng, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1405,7 +1405,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã An Thới Đông",
         "Xa/Phuong truoc sap nhap": "Xã Lý Nhơn và một phần xã An Thới Đông",
-        "Dia chi chinh xac": "HQRQ+7Q6, An Thới Đông, Hồ Chí Minh, Vietnam",
+        "Dia chi chinh xac": "313 đường An Thới Đông, ấp Quảng Xuyên, xã An Thới Đông, Thành phố Hồ Chí Minh",
         "So dien thoai": ""
       }
     },
@@ -1414,14 +1414,14 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.9547101,
-          10.4109996
+          106.95470843473849,
+          10.41138352031975
         ]
       },
       "properties": {
         "Ten Phuong/Xa": "Xã Cần Giờ",
         "Xa/Phuong truoc sap nhap": "Xã Long Hòa (huyện Cần Giờ), Thị trấn Cần Thạnh",
-        "Dia chi chinh xac": "CX63+GV9, Lương Văn Nho Giồng Ao, KP, Cần Giờ, Hồ Chí Minh, Vietnam",
+        "Dia chi chinh xac": "48 đường Lương Văn Nho, khu phố Giồng Ao, xã Cần Giờ, Thành phố Hồ Chí Minh",
         "So dien thoai": "02838740595"
       }
     },
@@ -1437,7 +1437,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Củ Chi",
         "Xa/Phuong truoc sap nhap": "Các xã Tân Phú Trung, Tân Thông Hội, Phước Vĩnh An",
-        "Dia chi chinh xac": "WGRQ+2W Cu Chi, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "314 Phan Văn Khải, ấp Chợ, Củ Chi, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1453,7 +1453,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Tân An Hội",
         "Xa/Phuong truoc sap nhap": "Thị trấn Củ Chi, Xã Phước Hiệp, Xã Tân An Hội",
-        "Dia chi chinh xac": "XFFV+8JG, Tân An Hội, Hồ Chí Minh, Vietnam",
+        "Dia chi chinh xac": "số 77 đường Tỉnh lộ 8, ấp Mũi Lớn, xã Tân An Hội",
         "So dien thoai": ""
       }
     },
@@ -1469,7 +1469,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Thái Mỹ",
         "Xa/Phuong truoc sap nhap": "Các xã Trung Lập Thượng, Phước Thạnh, Thái Mỹ",
-        "Dia chi chinh xac": "2C3J+XV8, Thái Mỹ, Hồ Chí Minh, Vietnam",
+        "Dia chi chinh xac": "số 712 đường Phan Văn Khải, ấp Phước Hưng, xã Thái Mỹ, TP. Hồ Chí Minh",
         "So dien thoai": ""
       }
     },
@@ -1485,7 +1485,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã An Nhơn Tây",
         "Xa/Phuong truoc sap nhap": "Các xã Phú Mỹ Hưng, An Phú, An Nhơn Tây",
-        "Dia chi chinh xac": "3GQ7+23 An Nhon Tay, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "1407 ĐT7, An Nhơn Tây, Hồ Chí Minh, Vietnam",
         "So dien thoai": "02837948397"
       }
     },
@@ -1501,7 +1501,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Nhuận Đức",
         "Xa/Phuong truoc sap nhap": "Các xã Phạm Văn Cội, Trung Lập Hạ, Nhuận Đức",
-        "Dia chi chinh xac": "Nguyễn Thị Rành, Nhuận Đức, Hồ Chí Minh, Vietnam",
+        "Dia chi chinh xac": "1A Bà Thiên, Nhuận Đức, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1517,7 +1517,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Phú Hòa Đông",
         "Xa/Phuong truoc sap nhap": "Các xã Tân Thạnh Tây, Tân Thạnh Đông, Phú Hòa Đông",
-        "Dia chi chinh xac": "XHM5+QQ Phu Hoa Dong, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "269 TL8, Phú Hòa Đông, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1533,7 +1533,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Bình Mỹ",
         "Xa/Phuong truoc sap nhap": "Các xã Bình Mỹ (huyện Củ Chi), Hòa Phú, Trung An",
-        "Dia chi chinh xac": "XJH8+XH Binh My, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "1627 TL8, Bình Mỹ, Hồ Chí Minh, Vietnam",
         "So dien thoai": "02837976143"
       }
     },
@@ -1549,7 +1549,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Hóc Môn",
         "Xa/Phuong truoc sap nhap": "Các xã Tân Hiệp (huyện Hóc Môn), Xã Tân Xuân, Thị trấn Hóc Môn",
-        "Dia chi chinh xac": "VHQV+6P Hoc Mon, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "11 đường Lý Thường Kiệt, Hóc Môn, Hồ Chí Minh 71303, Vietnam",
         "So dien thoai": "02838831166"
       }
     },
@@ -1565,7 +1565,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Xuân Thới Sơn",
         "Xa/Phuong truoc sap nhap": "Các xã Tân Thới Nhì, Xuân Thới Đông, Xuân Thới Sơn",
-        "Dia chi chinh xac": "VHGH+5R Xuan Thoi Son, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "01A Đ. Lê Thị Kim, Xuân Thới Sơn, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1581,7 +1581,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Bà Điểm",
         "Xa/Phuong truoc sap nhap": "Các xã Xuân Thới Thượng, Trung Chánh, Bà Điểm",
-        "Dia chi chinh xac": "RHRX+3J Ba Diem, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "14/9 Đ. Phan Văn Hớn, Bà Điểm, Hồ Chí Minh, Vietnam",
         "So dien thoai": ""
       }
     },
@@ -1597,7 +1597,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Nhà Bè",
         "Xa/Phuong truoc sap nhap": "Thị trấn Nhà Bè, Xã Phú Xuân, Xã Phước Kiến, Xã Phước Lộc",
-        "Dia chi chinh xac": "MPFM+R4 NHA Be, Ho Chi Minh, Vietnam",
+        "Dia chi chinh xac": "330 Nguyễn Bình, Nhà Bè, Hồ Chí Minh, Vietnam",
         "So dien thoai": "02837828119"
       }
     },
@@ -1629,7 +1629,7 @@
       "properties": {
         "Ten Phuong/Xa": "Xã Thạnh An",
         "Xa/Phuong truoc sap nhap": "Không sáp nhập",
-        "Dia chi chinh xac": "FXCG+738, Thạnh Bình, Thạnh An, Hồ Chí Minh, Vietnam",
+        "Dia chi chinh xac": "Ấp Thạnh Bình, xã Thạnh An, Thành phố Hồ Chí Minh",
         "So dien thoai": ""
       }
     }
