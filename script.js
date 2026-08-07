@@ -447,11 +447,11 @@ fetch(urlBoundary)
     .catch(error => console.error('Lỗi khi tải file ranh giới:', error));
 
 map.on('mousedown touchstart dragstart wheel', function() {
+    // Nếu bảng đang mở (không có class tàng hình) thì mới tắt nó đi
     if (suggestionsContainer && !suggestionsContainer.classList.contains('suggestions-hidden')) {
         hideSuggestions();
     }
 });
-
 
 
 
