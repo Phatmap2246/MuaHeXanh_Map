@@ -37,7 +37,7 @@ var userLat = null;
 var userLng = null;
 var currentRadius = 5;
 
-var geoJsonUrl = 'data/CacXaTPHCM.geojson';
+var geoJsonUrl = 'data/DuLieuBanDo_CapNhat.geojson';
 
 function removeVietnameseTones(str) {
     str = str.toLowerCase();
@@ -68,8 +68,8 @@ function createMarker(feature, latlng) {
     var sdt = feature.properties['So dien thoai'] || 'Chưa cập nhật';
 
     var popupContent = '<b>' + ten + '</b><br>' + 
-                       'Phường/xã cũ: ' + phongCu + '<br>' +
-                       diaChi + '<br>' +
+                       'Phường/xã cũ: ' + phongCu + '<br>' + 'Địa chỉ mới: ' +
+                       diaChi + '<br>' + 'Số điện thoại: ' +
                        sdt;
 
     var govIcon = L.divIcon({
