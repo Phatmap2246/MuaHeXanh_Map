@@ -758,7 +758,7 @@ body {
     border: none !important;
 }
 
-/* --- TÍNH NĂNG TÀNG HÌNH MARKER KHI ZOOM XA --- */
+
 .hide-our-markers .marker-cluster,
 .hide-our-markers .custom-layer {
     opacity: 0 !important;
@@ -767,14 +767,14 @@ body {
     transition: opacity 0.2s ease-in-out; 
 }
 
-/* --- HIỆU ỨNG TRƯỢT LÊN/XUỐNG CHO BẢNG SUGGESTIONS --- */
+
 #suggestions {
-    /* Đảm bảo có transition để tạo hoạt ảnh */
+    
     transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease !important;
 }
 
 .suggestions-hidden {
-    /* Bóp xẹp chiều cao và đệm về 0 để tạo cảm giác trượt lên */
+    
     max-height: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;

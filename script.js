@@ -81,7 +81,7 @@ function showSuggestions() {
     }
 }
 
-// Hàm chuyển đổi tiếng Việt siêu mạnh (Chuẩn hóa tối đa)
+// Hàm chuyển đổi tiếng Việt 
 function removeVietnameseTones(str) {
     if (!str) return "";
     str = str.toLowerCase();
@@ -447,8 +447,6 @@ fetch(urlBoundary)
     })
     .catch(error => console.error('Lỗi khi tải file ranh giới:', error));
 
-
-// Thêm 'dragstart' để bắt chuẩn xác 100% hành động vuốt/kéo bản đồ
 map.on('mousedown touchstart dragstart wheel', function() {
     if (suggestionsContainer && !suggestionsContainer.classList.contains('suggestions-hidden')) {
         hideSuggestions();
@@ -479,23 +477,18 @@ function enableAutoHide() {
 }
 setTimeout(enableAutoHide, 1000);
 
-// --- TÍNH NĂNG ẨN/HIỆN TOÀN BỘ MARKER THEO MỨC ĐỘ ZOOM ---
+
 var zoomHienMarker = 14; 
 
 function kiemTraHienThiMarker() {
     var mapDOM = map.getContainer(); 
-    
-    // Nếu zoom nhỏ hơn ngưỡng -> Thêm class tàng hình vào bản đồ
     if (map.getZoom() < zoomHienMarker) {
         mapDOM.classList.add('hide-our-markers');
     } else {
-        // Nếu zoom lớn hơn hoặc bằng ngưỡng -> Gỡ tàng hình
         mapDOM.classList.remove('hide-our-markers');
     }
 }
 
-// 1. Chạy hàm kiểm tra ngay khi vừa load web xong
-kiemTraHienThiMarker();
 
-// 2. Lắng nghe sự kiện: Mỗi khi người dùng cuộn chuột/vuốt zoom xong
+kiemTraHienThiMarker();
 map.on('zoomend', kiemTraHienThiMarker);
