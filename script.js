@@ -27,7 +27,9 @@ L.control.locate({
     stopFollowingOnDrag: true,
     circleStyle: { color: '#d32f2f', weight: 2, opacity: 0.5 }
 }).addTo(map);
-
+document.querySelector('.leaflet-control-locate')?.addEventListener('click', function() {
+    userClosedSuggestions = false; // Cho phép hiện lại khi chủ động bấm định vị
+});
 // 1. Khởi tạo MarkerClusterGroup thay vì LayerGroup thông thường
 var markersCluster = L.markerClusterGroup({
     chunkedLoading: true, 
@@ -43,7 +45,7 @@ var allMarkers = [];
 var userLat = null;
 var userLng = null;
 var currentRadius = 5;
-
+var userClosedSuggestions = false;
 var geoJsonUrl = 'data/DuLieuBanDo_CapNhat.geojson';
 
 // DOM elements
@@ -274,7 +276,7 @@ searchInput.addEventListener('keypress', function(e) {
 searchInput.addEventListener('input', function() {
     var keyword = this.value.trim();
     clearTimeout(searchTimeout);
-    
+    userClosedSuggestions = false;
     if (keyword === '') {
         hideSuggestions();
         if (userLat !== null && userLng !== null) {
@@ -301,7 +303,7 @@ if (closeSuggestionsBtn) {
 map.on('locationfound', function(e) {
     userLat = e.latlng.lat;
     userLng = e.latlng.lng;
-    if (searchInput.value.trim() === '') {
+    if (!userClosedSuggestions && searchInput.value.trim() === '') {
         timUBNDGanDay(userLat, userLng, currentRadius);
     }
 });
@@ -399,6 +401,7 @@ radiusBtns.forEach(function(btn) {
         radiusBtns.forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         currentRadius = parseFloat(this.getAttribute('data-radius'));
+        userClosedSuggestions = false;
         if (userLat !== null && userLng !== null) {
             timUBNDGanDay(userLat, userLng, currentRadius);
         } else {
@@ -452,6 +455,7 @@ map.on('mousedown touchstart dragstart wheel', function() {
     // Nếu bảng đang mở (không có class tàng hình) thì mới tắt nó đi
     if (suggestionsContainer && !suggestionsContainer.classList.contains('suggestions-hidden')) {
         hideSuggestions();
+        userClosedSuggestions = true
     }
 });
 
