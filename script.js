@@ -67,20 +67,31 @@ function createMarker(feature, latlng) {
     var diaChi = feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ';
     var sdt = feature.properties['So dien thoai'] || 'Chưa cập nhật';
 
-    var popupContent = '<b>' + ten + '</b><br>' + 
-                       'Phường/xã cũ: ' + phongCu + '<br>' + 'Địa chỉ mới: ' +
-                       diaChi + '<br>' + 'Số điện thoại: ' +
-                       sdt;
+    var popupContent = '<div style="font-size:0.95rem; line-height:1.6;">' +
+                   '<b style="font-size:1.1rem; color:#1b5e20;">' + ten + '</b><br>' +
+                   '<b>Phường/xã cũ:</b> ' + phongCu + '<br>' +
+                   '<b>Địa chỉ mới:</b> ' + diaChi + '<br>' +
+                   '<b>Số điện thoại:</b> ' + sdt +
+                   '</div>';
 
-    var govIcon = L.divIcon({
-        className: 'marker-government',
-        html: '<i class="fas fa-landmark"></i>',
-        iconSize: [36, 36],
-        iconAnchor: [18, 36],
-        popupAnchor: [0, -36]
+    var pinHTML = `
+        <div class="marker-pin">
+            <div class="pin-head">
+                <i class="fas fa-landmark"></i>
+            </div>
+            <div class="pin-tail"></div>
+        </div>
+    `;
+
+    var pinIcon = L.divIcon({
+        className: '',
+        html: pinHTML,
+        iconSize: [40, 56],
+        iconAnchor: [20, 56],   
+        popupAnchor: [0, -56]    
     });
 
-    var marker = L.marker(latlng, { icon: govIcon }).bindPopup(popupContent);
+    var marker = L.marker(latlng, { icon: pinIcon }).bindPopup(popupContent);
     return marker;
 }
 
