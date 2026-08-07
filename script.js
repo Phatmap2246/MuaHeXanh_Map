@@ -226,11 +226,9 @@ function hienThiKetQuaTimKiem(keyword) {
                     animate: true, 
                     duration: 1.5 
                 });
-                
-                
-                setTimeout(function() { 
+                map.once('moveend', function() { 
                     marker.openPopup(); 
-                }, 800);
+                });
             };
         })(item.marker, item.latlng);
 
@@ -346,10 +344,9 @@ function hienThiGoiY(danhSach, banKinh) {
                     animate: true, 
                     duration: 1.5 
                 });
-                
-                setTimeout(function() { 
+                map.once('moveend', function() { 
                     marker.openPopup(); 
-                }, 800);
+                });
             };
         })(item.marker, item.lat, item.lng);
 
