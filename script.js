@@ -1,13 +1,10 @@
 // Khởi tạo bản đồ
 var map = L.map('map', {
-    maxBounds: [
-        [10.0, 105.0],
-        [12.0, 108.0]
-    ],
+    maxBounds: [[10.0, 105.0], [12.0, 108.0]],
     maxBoundsViscosity: 1.0,
     minZoom: 10,
     maxZoom: 19,
-    preferCanvas: true, // Tối ưu render: Dùng Canvas thay vì SVG/DOM Elements để vẽ đường thẳng/mặt nạ
+    preferCanvas: true, 
     attributionControl: false
 }).setView([10.7769, 106.7009], 11);
 
@@ -15,7 +12,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     keepBuffer: 6,
     updateWhenIdle: false,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
 L.control.locate({
@@ -27,20 +24,17 @@ L.control.locate({
     stopFollowingOnDrag: true,
     circleStyle: { color: '#d32f2f', weight: 2, opacity: 0.5 }
 }).addTo(map);
+
 document.querySelector('.leaflet-control-locate')?.addEventListener('click', function() {
-    userClosedSuggestions = false; // Cho phép hiện lại khi chủ động bấm định vị
-});
-// 1. Khởi tạo MarkerClusterGroup thay vì LayerGroup thông thường
-var markersCluster = L.markerClusterGroup({
-    chunkedLoading: true, 
-    spiderfyOnMaxZoom: true,
-    showCoverageOnHover: false,
-    zoomToBoundsOnClick: true,
-    disableClusteringAtZoom: 15,
-    maxClusterRadius: 40
+    userClosedSuggestions = false; 
 });
 
-map.addLayer(markersCluster); // Thêm cluster vào map
+// KHAI BÁO 2 LỚP BẢN ĐỒ 
+var layerTatCa = L.layerGroup();  // Chứa 100% marker
+var layerDaiDien = L.layerGroup(); // Chỉ chứa marker trung tâm
+var ZOOM_MOC = 13; // Mức zoom bung tất cả các điểm
+var KHOANG_CACH_KM = 6; // Bán kính (km) để chọn 1 điểm đại diện
+
 var allMarkers = [];
 var userLat = null;
 var userLng = null;
@@ -48,29 +42,22 @@ var currentRadius = 5;
 var userClosedSuggestions = false;
 var geoJsonUrl = 'data/DuLieuBanDo_CapNhat.geojson';
 
-// DOM elements
 var searchInput = document.getElementById('searchInput');
 var suggestionsContainer = document.getElementById('suggestions');
 var footerElement = document.getElementById('footer');
+
 if (suggestionsContainer) {
     L.DomEvent.disableScrollPropagation(suggestionsContainer);
     L.DomEvent.disableClickPropagation(suggestionsContainer);
 }
 
-// --- HÀM ẨN/HIỆN MƯỢT MÀ BẰNG CSS CLASS ---
+// --- UI FUNCTIONS ---
 function hideSuggestions() {
     if (suggestionsContainer) {
-        
         suggestionsContainer.classList.add('suggestions-hidden');
-        
-        
         suggestionsContainer.style.display = ''; 
-        
-        setTimeout(function() {
-            map.invalidateSize();
-        }, 400);
+        setTimeout(function() { map.invalidateSize(); }, 400);
     }
-
     if (footerElement && typeof footerHidden !== 'undefined' && !footerHidden) {
         footerElement.style.display = 'block';
     }
@@ -78,21 +65,15 @@ function hideSuggestions() {
 
 function showSuggestions() {
     if (suggestionsContainer) {
-        
         suggestionsContainer.classList.remove('suggestions-hidden');
         suggestionsContainer.style.display = ''; 
     }
-    if (footerElement) {
-        footerElement.style.display = 'none';
-    }
+    if (footerElement) footerElement.style.display = 'none';
 }
 
-// Hàm chuyển đổi tiếng Việt 
 function removeVietnameseTones(str) {
     if (!str) return "";
     str = str.toLowerCase();
-    
-    // Xóa dấu tiếng Việt
     str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
     str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
     str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
@@ -100,10 +81,8 @@ function removeVietnameseTones(str) {
     str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
     str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
     str = str.replace(/đ/g, "d");
-
     return str.replace(/[^a-z0-9]/g, ""); 
 }
-
 
 var pinHTML = '<div class="gg-pin"></div>'; 
 var pinIcon = L.divIcon({
@@ -114,8 +93,7 @@ var pinIcon = L.divIcon({
     popupAnchor: [0, -36]
 });
 
-
-
+// Hàm tạo Marker giao diện đồng nhất
 function createMarker(feature, latlng) {
     var tenXa = feature.properties['Ten Phuong/Xa'] || 'UBND Xã';
     var popupContent = '<b>' + tenXa + '</b><br>' + 
@@ -131,30 +109,27 @@ function createMarker(feature, latlng) {
     var labelIcon = L.divIcon({
         className: 'custom-layer', 
         html: combinedHTML,
-        
-        
         iconSize: [0, 0], 
-        
         iconAnchor: [13, 13], 
-        
-    
         popupAnchor: [0, -15] 
     });
 
-    var marker = L.marker(latlng, { icon: labelIcon }).bindPopup(popupContent);
-    return marker;
+    return L.marker(latlng, { icon: labelIcon }).bindPopup(popupContent);
 }
 
-// Tải dữ liệu UBND
+// --- TẢI & XỬ LÝ DỮ LIỆU ---
 fetch(geoJsonUrl)
     .then(response => {
         if (!response.ok) throw new Error('Không tìm thấy file GeoJSON.');
         return response.json();
     })
     .then(data => {
-        markersCluster.clearLayers();
+        layerTatCa.clearLayers();
+        layerDaiDien.clearLayers();
         allMarkers = [];
+        var tapDaiDien = [];
 
+        // Bước 1: Nạp toàn bộ dữ liệu vào LayerTatCa và mảng tìm kiếm
         L.geoJSON(data, {
             pointToLayer: function(feature, latlng) {
                 var marker = createMarker(feature, latlng);
@@ -167,17 +142,53 @@ fetch(geoJsonUrl)
                     phongCu: phongCu,
                     diaChi: feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ',
                     latlng: latlng,
-                    
                     tenKhongDau: removeVietnameseTones(ten),
                     phongCuKhongDau: removeVietnameseTones(phongCu) 
                 });
-                return marker; 
-            },
-            onEachFeature: function(feature, layer) {
                 
-                markersCluster.addLayer(layer);
+                layerTatCa.addLayer(marker); 
+                return marker; 
             }
         }); 
+
+        // Bước 2: Thuật toán lọc các điểm đại diện (Cách nhau > 5km)
+        data.features.forEach(currentFeature => {
+            var coords = currentFeature.geometry.coordinates;
+            var currentLatLng = L.latLng(coords[1], coords[0]); 
+            var hopLe = true;
+
+            for (var i = 0; i < tapDaiDien.length; i++) {
+                var repCoords = tapDaiDien[i].geometry.coordinates;
+                var repLatLng = L.latLng(repCoords[1], repCoords[0]);
+                if (currentLatLng.distanceTo(repLatLng) < (KHOANG_CACH_KM * 1000)) {
+                    hopLe = false;
+                    break;
+                }
+            }
+            if (hopLe) tapDaiDien.push(currentFeature);
+        });
+
+        // Bước 3: Đưa điểm đại diện vào Layer riêng & Cài sự kiện Click
+        tapDaiDien.forEach(feature => {
+            var coords = feature.geometry.coordinates;
+            var latlng = L.latLng(coords[1], coords[0]);
+            var repMarker = createMarker(feature, latlng);
+            
+            // Logic quan trọng: Nhấn vào điểm đại diện -> Tự zoom lại gần (Mức 14) -> Mở popup
+            repMarker.on('click', function() {
+                map.setView(latlng, ZOOM_MOC + 1, { animate: true, duration: 1.0 });
+                map.once('moveend', function() {
+                    var matched = allMarkers.find(m => m.latlng.lat === latlng.lat && m.latlng.lng === latlng.lng);
+                    if (matched) matched.marker.openPopup();
+                });
+            });
+            
+            layerDaiDien.addLayer(repMarker);
+        });
+
+        // Kiểm tra zoom ban đầu để hiện đúng Layer
+        if (map.getZoom() < ZOOM_MOC) map.addLayer(layerDaiDien);
+        else map.addLayer(layerTatCa);
 
         console.log('Đã tải ' + allMarkers.length + ' địa điểm.');
         document.title = 'Bản đồ UBND TP.HCM (' + allMarkers.length + ' điểm)';
@@ -185,14 +196,22 @@ fetch(geoJsonUrl)
     })
     .catch(error => console.error('Lỗi:', error));
 
+// Bắt sự kiện cuộn chuột để đổi Layer mượt mà
+map.on('zoomend', function() {
+    var currentZoom = map.getZoom();
+    if (currentZoom < ZOOM_MOC) {
+        if (map.hasLayer(layerTatCa)) map.removeLayer(layerTatCa);
+        if (!map.hasLayer(layerDaiDien)) map.addLayer(layerDaiDien);
+    } else {
+        if (map.hasLayer(layerDaiDien)) map.removeLayer(layerDaiDien);
+        if (!map.hasLayer(layerTatCa)) map.addLayer(layerTatCa);
+    }
+});
 
+// --- CÁC HÀM TÌM KIẾM ---
 function hienThiKetQuaTimKiem(keyword) {
-   
     var keywordNoAccent = removeVietnameseTones(keyword);
-    
-   
     var results = allMarkers.filter(function(item) {
-        
         return item.tenKhongDau.includes(keywordNoAccent) || item.phongCuKhongDau.includes(keywordNoAccent);
     });
 
@@ -201,7 +220,6 @@ function hienThiKetQuaTimKiem(keyword) {
 
     listDiv.innerHTML = '';
     var title = document.querySelector('#suggestions strong');
-    
     if (title) {
         title.textContent = results.length > 0 
             ? 'Kết quả tìm kiếm "' + keyword + '" (' + results.length + '):' 
@@ -214,25 +232,16 @@ function hienThiKetQuaTimKiem(keyword) {
         return;
     }
 
-    
     var fragment = document.createDocumentFragment();
-    var soLuongHien = results.length;
-
-    for (var j = 0; j < soLuongHien; j++) {
+    for (var j = 0; j < results.length; j++) {
         var item = results[j];
         var div = document.createElement('div');
         div.className = 'suggestion-item';
 
         div.onclick = (function(marker, latlng) {
             return function() {
-                
-                map.setView([latlng.lat, latlng.lng], 16, { 
-                    animate: true, 
-                    duration: 1.5 
-                });
-                map.once('moveend', function() { 
-                    marker.openPopup(); 
-                });
+                map.setView([latlng.lat, latlng.lng], 16, { animate: true, duration: 1.5 });
+                map.once('moveend', function() { marker.openPopup(); });
             };
         })(item.marker, item.latlng);
 
@@ -246,11 +255,9 @@ function hienThiKetQuaTimKiem(keyword) {
         `;
         fragment.appendChild(div);
     }
-    
     listDiv.appendChild(fragment);
     showSuggestions();
 }
-
 
 var searchTimeout;
 function performSearch() {
@@ -258,9 +265,7 @@ function performSearch() {
     if (!keyword) {
         map.flyTo([10.7769, 106.7009], 11);
         hideSuggestions();
-        if (userLat !== null && userLng !== null) {
-            timUBNDGanDay(userLat, userLng, currentRadius);
-        }
+        if (userLat !== null && userLng !== null) timUBNDGanDay(userLat, userLng, currentRadius);
         return;
     }
     hienThiKetQuaTimKiem(keyword);
@@ -279,16 +284,10 @@ searchInput.addEventListener('input', function() {
     userClosedSuggestions = false;
     if (keyword === '') {
         hideSuggestions();
-        if (userLat !== null && userLng !== null) {
-            timUBNDGanDay(userLat, userLng, currentRadius);
-        }
+        if (userLat !== null && userLng !== null) timUBNDGanDay(userLat, userLng, currentRadius);
         return;
     }
-    
-    // Đợi 80ms sau khi ngừng gõ mới chạy tìm kiếm
-    searchTimeout = setTimeout(function() {
-        hienThiKetQuaTimKiem(keyword);
-    }, 80);
+    searchTimeout = setTimeout(function() { hienThiKetQuaTimKiem(keyword); }, 80);
 });
 
 var closeSuggestionsBtn = document.getElementById('closeSuggestions');
@@ -299,7 +298,7 @@ if (closeSuggestionsBtn) {
     });
 }
 
-// Xử lý định vị và khoảng cách
+// --- GPS VÀ KHOẢNG CÁCH ---
 map.on('locationfound', function(e) {
     userLat = e.latlng.lat;
     userLng = e.latlng.lng;
@@ -335,27 +334,18 @@ function hienThiGoiY(danhSach, banKinh) {
     danhSach.sort((a, b) => a.khoangCach - b.khoangCach);
     
     var fragment = document.createDocumentFragment();
-    var soLuongHien = danhSach.length;
-
-    for (var i = 0; i < soLuongHien; i++) {
+    for (var i = 0; i < danhSach.length; i++) {
         var item = danhSach[i];
         var div = document.createElement('div');
         div.className = 'suggestion-item';
         div.onclick = (function(marker, lat, lng) {
             return function() {
-               
-                map.setView([lat, lng], 16, { 
-                    animate: true, 
-                    duration: 1.5 
-                });
-                map.once('moveend', function() { 
-                    marker.openPopup(); 
-                });
+                map.setView([lat, lng], 16, { animate: true, duration: 1.5 });
+                map.once('moveend', function() { marker.openPopup(); });
             };
         })(item.marker, item.lat, item.lng);
 
         var distStr = item.khoangCach < 1 ? (item.khoangCach * 1000).toFixed(0) + ' m' : item.khoangCach.toFixed(1) + ' km';
-        
         div.innerHTML = `
             <div class="suggestion-info">
                 <strong>${item.ten}</strong>
@@ -366,7 +356,6 @@ function hienThiGoiY(danhSach, banKinh) {
         `;
         fragment.appendChild(div);
     }
-    
     listDiv.appendChild(fragment);
     showSuggestions();
 }
@@ -410,7 +399,7 @@ radiusBtns.forEach(function(btn) {
     });
 });
 
-// Vẽ ranh giới mượt mà hơn với preferCanvas đã bật ở phần khởi tạo L.map
+// --- VẼ RANH GIỚI ---
 const urlBoundary = 'data/hcm_new.geojson';
 fetch(urlBoundary)
     .then(res => {
@@ -452,48 +441,23 @@ fetch(urlBoundary)
     .catch(error => console.error('Lỗi khi tải file ranh giới:', error));
 
 map.on('mousedown touchstart dragstart wheel', function() {
-    // Nếu bảng đang mở (không có class tàng hình) thì mới tắt nó đi
     if (suggestionsContainer && !suggestionsContainer.classList.contains('suggestions-hidden')) {
         hideSuggestions();
         userClosedSuggestions = true
     }
 });
 
-
-
 var footerHidden = false;
-
-
 function performFooterHide() {
     if (!footerHidden && footerElement) {
         footerElement.classList.add('footer-hidden');
         footerHidden = true;
-        setTimeout(function() {
-            map.invalidateSize();
-        }, 400);
+        setTimeout(function() { map.invalidateSize(); }, 400);
         map.off('dragstart zoomstart click touchstart', performFooterHide);
-        console.log("Footer đã được ẩn vĩnh viễn.");
     }
 }
-
 
 function enableAutoHide() {
     map.on('dragstart zoomstart click touchstart', performFooterHide);
 }
 setTimeout(enableAutoHide, 1000);
-
-
-var zoomHienMarker = 14; 
-
-function kiemTraHienThiMarker() {
-    var mapDOM = map.getContainer(); 
-    if (map.getZoom() < zoomHienMarker) {
-        mapDOM.classList.add('hide-our-markers');
-    } else {
-        mapDOM.classList.remove('hide-our-markers');
-    }
-}
-
-
-kiemTraHienThiMarker();
-map.on('zoomend', kiemTraHienThiMarker);
