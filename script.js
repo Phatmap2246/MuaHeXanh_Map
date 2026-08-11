@@ -1,4 +1,4 @@
-// Khởi tạo bản đồ
+// --- 1. KHỞI TẠO BẢN ĐỒ ---
 var map = L.map('map', {
     maxBounds: [[10.0, 105.0], [12.0, 108.0]],
     maxBoundsViscosity: 1.0,
@@ -15,6 +15,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
+// Định vị GPS
 L.control.locate({
     position: 'topleft',
     strings: { title: 'Xem vi tri cua toi' },
@@ -29,11 +30,24 @@ document.querySelector('.leaflet-control-locate')?.addEventListener('click', fun
     userClosedSuggestions = false; 
 });
 
-// KHAI BÁO 2 LỚP BẢN ĐỒ 
-var layerTatCa = L.layerGroup();  // Chứa 100% marker
-var layerDaiDien = L.layerGroup(); // Chỉ chứa marker trung tâm
-var ZOOM_MOC = 13; // Mức zoom bung tất cả các điểm
-var KHOANG_CACH_KM = 6; // Bán kính (km) để chọn 1 điểm đại diện
+// --- 2. CẤU HÌNH THUẬT TOÁN CLUSTER (GỘP ĐIỂM THÔNG MINH) ---
+var markersCluster = L.markerClusterGroup({
+    chunkedLoading: true, 
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true, 
+    disableClusteringAtZoom: 14, // Mốc zoom bung toàn bộ các điểm (Mốc 14 là đẹp nhất)
+    maxClusterRadius: 50, // Bán kính gộp điểm (60px giúp điểm đại diện phân bố đều)
+    
+    // TÍNH NĂNG ẨN: Hack icon Cluster thành icon của chính 1 Phường đại diện
+    iconCreateFunction: function(cluster) {
+        var markers = cluster.getAllChildMarkers();
+        var repMarker = markers[0]; 
+        return repMarker.options.icon;
+    }
+});
+
+map.addLayer(markersCluster);
 
 var allMarkers = [];
 var userLat = null;
@@ -51,7 +65,7 @@ if (suggestionsContainer) {
     L.DomEvent.disableClickPropagation(suggestionsContainer);
 }
 
-// --- UI FUNCTIONS ---
+// --- 3. UI FUNCTIONS ---
 function hideSuggestions() {
     if (suggestionsContainer) {
         suggestionsContainer.classList.add('suggestions-hidden');
@@ -84,16 +98,8 @@ function removeVietnameseTones(str) {
     return str.replace(/[^a-z0-9]/g, ""); 
 }
 
+// Giao diện ghim đồng nhất (dùng cho cả điểm chi tiết và điểm đại diện)
 var pinHTML = '<div class="gg-pin"></div>'; 
-var pinIcon = L.divIcon({
-    className: 'custom-layer', 
-    html: pinHTML,
-    iconSize: [30, 30],
-    iconAnchor: [15, 36],
-    popupAnchor: [0, -36]
-});
-
-// Hàm tạo Marker giao diện đồng nhất
 function createMarker(feature, latlng) {
     var tenXa = feature.properties['Ten Phuong/Xa'] || 'UBND Xã';
     var popupContent = '<b>' + tenXa + '</b><br>' + 
@@ -117,19 +123,16 @@ function createMarker(feature, latlng) {
     return L.marker(latlng, { icon: labelIcon }).bindPopup(popupContent);
 }
 
-// --- TẢI & XỬ LÝ DỮ LIỆU ---
+// --- 4. TẢI DỮ LIỆU ---
 fetch(geoJsonUrl)
     .then(response => {
         if (!response.ok) throw new Error('Không tìm thấy file GeoJSON.');
         return response.json();
     })
     .then(data => {
-        layerTatCa.clearLayers();
-        layerDaiDien.clearLayers();
+        markersCluster.clearLayers();
         allMarkers = [];
-        var tapDaiDien = [];
 
-        // Bước 1: Nạp toàn bộ dữ liệu vào LayerTatCa và mảng tìm kiếm
         L.geoJSON(data, {
             pointToLayer: function(feature, latlng) {
                 var marker = createMarker(feature, latlng);
@@ -146,49 +149,13 @@ fetch(geoJsonUrl)
                     phongCuKhongDau: removeVietnameseTones(phongCu) 
                 });
                 
-                layerTatCa.addLayer(marker); 
                 return marker; 
+            },
+            onEachFeature: function(feature, layer) {
+                // Đưa toàn bộ vào Cluster, thư viện sẽ tự động tính toán gộp điểm!
+                markersCluster.addLayer(layer);
             }
         }); 
-
-        // Bước 2: Thuật toán lọc các điểm đại diện (Cách nhau > 5km)
-        data.features.forEach(currentFeature => {
-            var coords = currentFeature.geometry.coordinates;
-            var currentLatLng = L.latLng(coords[1], coords[0]); 
-            var hopLe = true;
-
-            for (var i = 0; i < tapDaiDien.length; i++) {
-                var repCoords = tapDaiDien[i].geometry.coordinates;
-                var repLatLng = L.latLng(repCoords[1], repCoords[0]);
-                if (currentLatLng.distanceTo(repLatLng) < (KHOANG_CACH_KM * 1000)) {
-                    hopLe = false;
-                    break;
-                }
-            }
-            if (hopLe) tapDaiDien.push(currentFeature);
-        });
-
-        // Bước 3: Đưa điểm đại diện vào Layer riêng & Cài sự kiện Click
-        tapDaiDien.forEach(feature => {
-            var coords = feature.geometry.coordinates;
-            var latlng = L.latLng(coords[1], coords[0]);
-            var repMarker = createMarker(feature, latlng);
-            
-            // Logic quan trọng: Nhấn vào điểm đại diện -> Tự zoom lại gần (Mức 14) -> Mở popup
-            repMarker.on('click', function() {
-                map.setView(latlng, ZOOM_MOC + 1, { animate: true, duration: 1.0 });
-                map.once('moveend', function() {
-                    var matched = allMarkers.find(m => m.latlng.lat === latlng.lat && m.latlng.lng === latlng.lng);
-                    if (matched) matched.marker.openPopup();
-                });
-            });
-            
-            layerDaiDien.addLayer(repMarker);
-        });
-
-        // Kiểm tra zoom ban đầu để hiện đúng Layer
-        if (map.getZoom() < ZOOM_MOC) map.addLayer(layerDaiDien);
-        else map.addLayer(layerTatCa);
 
         console.log('Đã tải ' + allMarkers.length + ' địa điểm.');
         document.title = 'Bản đồ UBND TP.HCM (' + allMarkers.length + ' điểm)';
@@ -196,19 +163,8 @@ fetch(geoJsonUrl)
     })
     .catch(error => console.error('Lỗi:', error));
 
-// Bắt sự kiện cuộn chuột để đổi Layer mượt mà
-map.on('zoomend', function() {
-    var currentZoom = map.getZoom();
-    if (currentZoom < ZOOM_MOC) {
-        if (map.hasLayer(layerTatCa)) map.removeLayer(layerTatCa);
-        if (!map.hasLayer(layerDaiDien)) map.addLayer(layerDaiDien);
-    } else {
-        if (map.hasLayer(layerDaiDien)) map.removeLayer(layerDaiDien);
-        if (!map.hasLayer(layerTatCa)) map.addLayer(layerTatCa);
-    }
-});
 
-// --- CÁC HÀM TÌM KIẾM ---
+// --- 5. TÌM KIẾM ---
 function hienThiKetQuaTimKiem(keyword) {
     var keywordNoAccent = removeVietnameseTones(keyword);
     var results = allMarkers.filter(function(item) {
@@ -298,7 +254,7 @@ if (closeSuggestionsBtn) {
     });
 }
 
-// --- GPS VÀ KHOẢNG CÁCH ---
+// --- 6. GPS VÀ TÌM ĐIỂM GẦN NHẤT ---
 map.on('locationfound', function(e) {
     userLat = e.latlng.lat;
     userLng = e.latlng.lng;
@@ -399,7 +355,7 @@ radiusBtns.forEach(function(btn) {
     });
 });
 
-// --- VẼ RANH GIỚI ---
+// --- 7. VẼ RANH GIỚI VÀ SỰ KIỆN CHUỘT ---
 const urlBoundary = 'data/hcm_new.geojson';
 fetch(urlBoundary)
     .then(res => {
