@@ -15,7 +15,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// Định vị GPS
 L.control.locate({
     position: 'topleft',
     strings: { title: 'Xem vi tri cua toi' },
@@ -30,24 +29,11 @@ document.querySelector('.leaflet-control-locate')?.addEventListener('click', fun
     userClosedSuggestions = false; 
 });
 
-// --- 2. CẤU HÌNH THUẬT TOÁN CLUSTER (GỘP ĐIỂM THÔNG MINH) ---
-var markersCluster = L.markerClusterGroup({
-    chunkedLoading: true, 
-    spiderfyOnMaxZoom: true,
-    showCoverageOnHover: false,
-    zoomToBoundsOnClick: true, 
-    disableClusteringAtZoom: 14, // Mốc zoom bung toàn bộ các điểm (Mốc 14 là đẹp nhất)
-    maxClusterRadius: 50, // Bán kính gộp điểm (60px giúp điểm đại diện phân bố đều)
-    
-    // TÍNH NĂNG ẨN: Hack icon Cluster thành icon của chính 1 Phường đại diện
-    iconCreateFunction: function(cluster) {
-        var markers = cluster.getAllChildMarkers();
-        var repMarker = markers[0]; 
-        return repMarker.options.icon;
-    }
-});
-
-map.addLayer(markersCluster);
+// --- 2. CẤU HÌNH LAYER VÀ KILOMET ---
+var layerTatCa = L.layerGroup(); 
+var layerDaiDien = L.layerGroup(); 
+var ZOOM_MOC = 13.5; 
+var KHOANG_CACH_KM = 6; 
 
 var allMarkers = [];
 var userLat = null;
@@ -98,8 +84,6 @@ function removeVietnameseTones(str) {
     return str.replace(/[^a-z0-9]/g, ""); 
 }
 
-// Giao diện ghim đồng nhất (dùng cho cả điểm chi tiết và điểm đại diện)
-var pinHTML = '<div class="gg-pin"></div>'; 
 function createMarker(feature, latlng) {
     var tenXa = feature.properties['Ten Phuong/Xa'] || 'UBND Xã';
     var popupContent = '<b>' + tenXa + '</b><br>' + 
@@ -123,15 +107,17 @@ function createMarker(feature, latlng) {
     return L.marker(latlng, { icon: labelIcon }).bindPopup(popupContent);
 }
 
-// --- 4. TẢI DỮ LIỆU ---
+// --- 4. TẢI VÀ LỌC DỮ LIỆU ---
 fetch(geoJsonUrl)
     .then(response => {
         if (!response.ok) throw new Error('Không tìm thấy file GeoJSON.');
         return response.json();
     })
     .then(data => {
-        markersCluster.clearLayers();
+        layerTatCa.clearLayers();
+        layerDaiDien.clearLayers();
         allMarkers = [];
+        var tapDaiDien = [];
 
         L.geoJSON(data, {
             pointToLayer: function(feature, latlng) {
@@ -149,20 +135,65 @@ fetch(geoJsonUrl)
                     phongCuKhongDau: removeVietnameseTones(phongCu) 
                 });
                 
+                layerTatCa.addLayer(marker); 
                 return marker; 
-            },
-            onEachFeature: function(feature, layer) {
-                // Đưa toàn bộ vào Cluster, thư viện sẽ tự động tính toán gộp điểm!
-                markersCluster.addLayer(layer);
             }
         }); 
 
-        console.log('Đã tải ' + allMarkers.length + ' địa điểm.');
-        document.title = 'Bản đồ UBND TP.HCM (' + allMarkers.length + ' điểm)';
+        // Lọc điểm đại diện theo KM cố định
+        data.features.forEach(currentFeature => {
+            var coords = currentFeature.geometry.coordinates;
+            var currentLatLng = L.latLng(coords[1], coords[0]); 
+            var hopLe = true;
+
+            for (var i = 0; i < tapDaiDien.length; i++) {
+                var repCoords = tapDaiDien[i].geometry.coordinates;
+                var repLatLng = L.latLng(repCoords[1], repCoords[0]);
+                if (currentLatLng.distanceTo(repLatLng) < (KHOANG_CACH_KM * 1000)) {
+                    hopLe = false;
+                    break;
+                }
+            }
+            if (hopLe) tapDaiDien.push(currentFeature);
+        });
+
+        tapDaiDien.forEach(feature => {
+            var coords = feature.geometry.coordinates;
+            var latlng = L.latLng(coords[1], coords[0]);
+            var repMarker = createMarker(feature, latlng);
+            
+            // LOGIC CLICK MƯỢT MÀ: Tự zoom vào điểm đó, hệ thống sẽ tự đổi layer
+            repMarker.on('click', function() {
+                map.flyTo(latlng, ZOOM_MOC + 1, { animate: true, duration: 1.2 });
+                map.once('moveend', function() {
+                    var matched = allMarkers.find(m => m.latlng.lat === latlng.lat && m.latlng.lng === latlng.lng);
+                    if (matched) matched.marker.openPopup();
+                });
+            });
+            
+            layerDaiDien.addLayer(repMarker);
+        });
+
+        // Thiết lập hiển thị ban đầu
+        if (map.getZoom() < ZOOM_MOC) map.addLayer(layerDaiDien);
+        else map.addLayer(layerTatCa);
+
+        console.log('Đã nạp xong bản đồ!');
         hideSuggestions();
     })
     .catch(error => console.error('Lỗi:', error));
 
+// Cơ chế chuyển Layer tự động khi zoom
+map.on('zoomend', function() {
+    var currentZoom = map.getZoom();
+    if (currentZoom < ZOOM_MOC) {
+        if (map.hasLayer(layerTatCa)) map.removeLayer(layerTatCa);
+        if (!map.hasLayer(layerDaiDien)) map.addLayer(layerDaiDien);
+    } else {
+        if (map.hasLayer(layerDaiDien)) map.removeLayer(layerDaiDien);
+        if (!map.hasLayer(layerTatCa)) map.addLayer(layerTatCa);
+    }
+});
 
 // --- 5. TÌM KIẾM ---
 function hienThiKetQuaTimKiem(keyword) {
@@ -196,7 +227,7 @@ function hienThiKetQuaTimKiem(keyword) {
 
         div.onclick = (function(marker, latlng) {
             return function() {
-                map.setView([latlng.lat, latlng.lng], 16, { animate: true, duration: 1.5 });
+                map.flyTo(latlng, 16, { animate: true, duration: 1.5 });
                 map.once('moveend', function() { marker.openPopup(); });
             };
         })(item.marker, item.latlng);
@@ -296,7 +327,7 @@ function hienThiGoiY(danhSach, banKinh) {
         div.className = 'suggestion-item';
         div.onclick = (function(marker, lat, lng) {
             return function() {
-                map.setView([lat, lng], 16, { animate: true, duration: 1.5 });
+                map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
                 map.once('moveend', function() { marker.openPopup(); });
             };
         })(item.marker, item.lat, item.lng);
@@ -319,13 +350,11 @@ function hienThiGoiY(danhSach, banKinh) {
 function timUBNDGanDay(lat, lng, banKinh) {
     if (!banKinh) banKinh = 5;
     var ketQua = [];
-    
     for (var i = 0; i < allMarkers.length; i++) {
         var markerInfo = allMarkers[i];
         var lat2 = markerInfo.latlng.lat;
         var lng2 = markerInfo.latlng.lng;
         var khoangCach = tinhKhoangCach(lat, lng, lat2, lng2);
-
         if (khoangCach <= banKinh) {
             ketQua.push({
                 ten: markerInfo.ten,
@@ -355,7 +384,7 @@ radiusBtns.forEach(function(btn) {
     });
 });
 
-// --- 7. VẼ RANH GIỚI VÀ SỰ KIỆN CHUỘT ---
+// --- 7. VẼ RANH GIỚI ---
 const urlBoundary = 'data/hcm_new.geojson';
 fetch(urlBoundary)
     .then(res => {
