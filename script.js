@@ -1,4 +1,5 @@
-// --- 1. KHỞI TẠO BẢN ĐỒ ---
+L.TileLayer.prototype.options.referrerPolicy = 'strict-origin-when-cross-origin';
+
 var map = L.map('map', {
     maxBounds: [[10.0, 105.0], [12.0, 108.0]],
     maxBoundsViscosity: 1.0,
@@ -15,6 +16,57 @@ L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors, Tiles style by HOT'
 }).addTo(map);
 
+// 1. Tự tạo bộ từ điển Tiếng Việt nạp vào thư viện
+L.Routing.Localization = L.Routing.Localization || {};
+L.Routing.Localization['vi'] = {
+    directions: {
+        N: 'hướng Bắc',
+        NE: 'hướng Đông Bắc',
+        E: 'hướng Đông',
+        SE: 'hướng Đông Nam',
+        S: 'hướng Nam',
+        SW: 'hướng Tây Nam',
+        W: 'hướng Tây',
+        NW: 'hướng Tây Bắc'
+    },
+    instructions: {
+        'Head': ['Đi về {dir} trên {road}', 'Đi về {dir}'],
+        'Continue': ['Tiếp tục đi trên {road}', 'Tiếp tục đi thẳng'],
+        'SlightRight': ['Chếch sang phải vào {road}', 'Chếch sang phải'],
+        'Right': ['Rẽ phải vào {road}', 'Rẽ phải'],
+        'SharpRight': ['Rẽ ngoặt sang phải vào {road}', 'Rẽ ngoặt sang phải'],
+        'TurnAround': ['Quay đầu lại vào {road}', 'Quay đầu lại'],
+        'SharpLeft': ['Rẽ ngoặt sang trái vào {road}', 'Rẽ ngoặt sang trái'],
+        'Left': ['Rẽ trái vào {road}', 'Rẽ trái'],
+        'SlightLeft': ['Chếch sang trái vào {road}', 'Chếch sang trái'],
+        'WaypointReached': ['Đã đến điểm dừng', 'Đã đến điểm dừng'],
+        'Roundabout': ['Đi vào vòng xuyến và đi theo lối ra thứ {exitStr} vào {road}', 'Đi vào vòng xuyến'],
+        'DestinationReached': ['Bạn đã đến nơi', 'Bạn đã đến nơi']
+    },
+    formatOrder: function(n) {
+        return n;
+    },
+    ui: {
+        startPlaceholder: 'Điểm xuất phát',
+        endPlaceholder: 'Điểm đến'
+    }
+};
+
+// 2. Khởi tạo tính năng chỉ đường (Bật lại language: 'vi')
+let routingControl = L.Routing.control({
+    waypoints: [], 
+    routeWhileDragging: false, 
+    lineOptions: {
+        styles: [{color: '#007bff', opacity: 0.7, weight: 6}] // Đường màu xanh
+    },
+    show: true,
+    addWaypoints: false,
+    language: 'vi' // Đã bật tiếng Việt thành công!
+}).addTo(map);
+
+// Xóa đi các từ thừa tiếng Anh (như "on the left") mà server OSRM thỉnh thoảng hay chèn vào
+routingControl.getRouter().options.language = 'vi';
+
 L.control.locate({
     position: 'topleft',
     strings: { title: 'Xem vi tri cua toi' },
@@ -29,7 +81,6 @@ document.querySelector('.leaflet-control-locate')?.addEventListener('click', fun
     userClosedSuggestions = false; 
 });
 
-// --- 2. CẤU HÌNH LAYER VÀ KILOMET ---
 var layerTatCa = L.layerGroup(); 
 var layerDaiDien = L.layerGroup(); 
 var ZOOM_MOC = 13.5; 
@@ -51,7 +102,6 @@ if (suggestionsContainer) {
     L.DomEvent.disableClickPropagation(suggestionsContainer);
 }
 
-// --- 3. UI FUNCTIONS ---
 function hideSuggestions() {
     if (suggestionsContainer) {
         suggestionsContainer.classList.add('suggestions-hidden');
@@ -86,16 +136,32 @@ function removeVietnameseTones(str) {
 
 function createMarker(feature, latlng) {
     var tenXa = feature.properties['Ten Phuong/Xa'] || 'UBND Xã';
-    var popupContent = '<b>' + tenXa + '</b><br>' + 
-                       '<b>Phường/xã cũ</b>: ' + (feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin') + '<br>' +
-                       '<b>Địa chỉ mới: </b>' + (feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ') + '<br>' +
-                       '<b>Số điện thoại: </b>' + (feature.properties['So dien thoai'] || 'Chưa cập nhật');
+    var phongCu = feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin';
+    var diaChi = feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ';
+    var sdt = feature.properties['So dien thoai'] || 'Chưa cập nhật';
+
+    // Đưa nút Chỉ đường vào Popup của dữ liệu thật
+    var popupContent = `
+        <div style="text-align: left;">
+            <h4 style="margin: 0 0 8px 0; color: #d32f2f;">${tenXa}</h4>
+            <p style="margin: 0 0 5px 0; font-size: 14px;"><b>Phường/xã cũ:</b> ${phongCu}</p>
+            <p style="margin: 0 0 5px 0; font-size: 14px;"><b>Địa chỉ:</b> ${diaChi}</p>
+            <p style="margin: 0 0 12px 0; font-size: 14px;"><b>SĐT:</b> ${sdt}</p>
+            
+            <button onclick="getRouteTo(${latlng.lat}, ${latlng.lng})" 
+                    style="background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px;">
+                <i class="fas fa-location-arrow"></i> Chỉ đường đến đây
+            </button>
+        </div>
+    `;
+
     var combinedHTML = `
         <div class="marker-with-label">
             <div class="gg-pin"></div>
             <span class="pin-label">${tenXa}</span>
         </div>
     `;
+    
     var labelIcon = L.divIcon({
         className: 'custom-layer', 
         html: combinedHTML,
@@ -107,7 +173,6 @@ function createMarker(feature, latlng) {
     return L.marker(latlng, { icon: labelIcon }).bindPopup(popupContent);
 }
 
-// --- 4. TẢI VÀ LỌC DỮ LIỆU ---
 fetch(geoJsonUrl)
     .then(response => {
         if (!response.ok) throw new Error('Không tìm thấy file GeoJSON.');
@@ -140,7 +205,6 @@ fetch(geoJsonUrl)
             }
         }); 
 
-        // Lọc điểm đại diện theo KM cố định
         data.features.forEach(currentFeature => {
             var coords = currentFeature.geometry.coordinates;
             var currentLatLng = L.latLng(coords[1], coords[0]); 
@@ -162,7 +226,6 @@ fetch(geoJsonUrl)
             var latlng = L.latLng(coords[1], coords[0]);
             var repMarker = createMarker(feature, latlng);
             
-            // LOGIC CLICK MƯỢT MÀ: Tự zoom vào điểm đó, hệ thống sẽ tự đổi layer
             repMarker.on('click', function() {
                 map.flyTo(latlng, ZOOM_MOC + 1, { animate: true, duration: 1.2 });
                 map.once('moveend', function() {
@@ -174,7 +237,6 @@ fetch(geoJsonUrl)
             layerDaiDien.addLayer(repMarker);
         });
 
-        // Thiết lập hiển thị ban đầu
         if (map.getZoom() < ZOOM_MOC) map.addLayer(layerDaiDien);
         else map.addLayer(layerTatCa);
 
@@ -183,7 +245,6 @@ fetch(geoJsonUrl)
     })
     .catch(error => console.error('Lỗi:', error));
 
-// Cơ chế chuyển Layer tự động khi zoom
 map.on('zoomend', function() {
     var currentZoom = map.getZoom();
     if (currentZoom < ZOOM_MOC) {
@@ -195,7 +256,6 @@ map.on('zoomend', function() {
     }
 });
 
-// --- 5. TÌM KIẾM ---
 function hienThiKetQuaTimKiem(keyword) {
     var keywordNoAccent = removeVietnameseTones(keyword);
     var results = allMarkers.filter(function(item) {
@@ -285,7 +345,6 @@ if (closeSuggestionsBtn) {
     });
 }
 
-// --- 6. GPS VÀ TÌM ĐIỂM GẦN NHẤT ---
 map.on('locationfound', function(e) {
     userLat = e.latlng.lat;
     userLng = e.latlng.lng;
@@ -384,7 +443,6 @@ radiusBtns.forEach(function(btn) {
     });
 });
 
-// --- 7. VẼ RANH GIỚI ---
 const urlBoundary = 'data/hcm_new.geojson';
 fetch(urlBoundary)
     .then(res => {
@@ -446,3 +504,59 @@ function enableAutoHide() {
     map.on('dragstart zoomstart click touchstart', performFooterHide);
 }
 setTimeout(enableAutoHide, 1000);
+
+let marker = L.marker([destLat, destLng]).addTo(map);
+
+let popupContent = `
+    <div style="text-align: center;">
+        <h4 style="margin: 0 0 5px 0;">Đối tượng: Sinh viên</h4>
+        <p style="margin: 0 0 10px 0;">Chưa khám y tế</p>
+        <button onclick="getRouteTo(${destLat}, ${destLng})" 
+                style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
+            <i class="fas fa-location-arrow"></i> Chỉ đường đến đây
+        </button>
+    </div>
+`;
+
+marker.bindPopup(popupContent);
+
+function getRouteTo(lat, lng) {
+    map.closePopup();
+
+    // 1. Ưu tiên xài tọa độ đã có sẵn nếu bạn đã bấm nút Định vị trước đó
+    // Cách này giúp đường vẽ ra ngay lập tức, không bị Safari chặn
+    if (userLat !== null && userLng !== null) {
+        routingControl.setWaypoints([
+            L.latLng(userLat, userLng),
+            L.latLng(lat, lng)
+        ]);
+        return; // Dừng hàm tại đây, không xin quyền GPS nữa
+    }
+
+    // 2. Nếu chưa có tọa độ, yêu cầu trình duyệt lấy vị trí
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(pos) {
+                // Cập nhật luôn tọa độ vào biến dùng chung
+                userLat = pos.coords.latitude;
+                userLng = pos.coords.longitude;
+                
+                routingControl.setWaypoints([
+                    L.latLng(userLat, userLng),
+                    L.latLng(lat, lng)
+                ]);
+            }, 
+            function(err) {
+                console.warn("Lỗi GPS:", err);
+                alert("Không thể lấy vị trí của bạn! Lỗi hệ thống báo: " + err.message);
+            }, 
+            {
+                enableHighAccuracy: true,
+                timeout: 15000, // Tăng lên 15 giây để Safari có đủ thời gian phản hồi
+                maximumAge: 0
+            }
+        );
+    } else {
+        alert("Trình duyệt hoặc thiết bị của bạn không hỗ trợ tính năng định vị.");
+    }
+}
