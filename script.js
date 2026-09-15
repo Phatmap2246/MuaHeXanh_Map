@@ -8,11 +8,11 @@ var map = L.map('map', {
     attributionControl: false
 }).setView([10.7769, 106.7009], 11);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     maxZoom: 19,
     keepBuffer: 6,
     updateWhenIdle: false,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap contributors, Tiles style by HOT'
 }).addTo(map);
 
 L.control.locate({
