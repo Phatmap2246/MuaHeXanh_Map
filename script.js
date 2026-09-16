@@ -6,70 +6,148 @@ var map = L.map('map', {
     minZoom: 10,
     maxZoom: 19,
     preferCanvas: true, 
-    attributionControl: false
+    attributionControl: false,
+    zoomControl: false 
 }).setView([10.7769, 106.7009], 11);
 
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// 1. DÙNG LẠI BẢN ĐỒ HOT CỦA PHÁP NHƯNG ĐÃ ÉP XUNG ĐA LUỒNG & BỘ ĐỆM TỐI ƯU
 L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    keepBuffer: 6,
-    updateWhenIdle: false,
+    subdomains: ['a', 'b', 'c'], 
+    keepBuffer: 2,               
+    updateWhenZooming: false,    
+    updateWhenIdle: true,        
     attribution: '&copy; OpenStreetMap contributors, Tiles style by HOT'
 }).addTo(map);
 
-// 1. Tự tạo bộ từ điển Tiếng Việt nạp vào thư viện
 L.Routing.Localization = L.Routing.Localization || {};
 L.Routing.Localization['vi'] = {
-    directions: {
-        N: 'hướng Bắc',
-        NE: 'hướng Đông Bắc',
-        E: 'hướng Đông',
-        SE: 'hướng Đông Nam',
-        S: 'hướng Nam',
-        SW: 'hướng Tây Nam',
-        W: 'hướng Tây',
-        NW: 'hướng Tây Bắc'
-    },
-    instructions: {
-        'Head': ['Đi về {dir} trên {road}', 'Đi về {dir}'],
-        'Continue': ['Tiếp tục đi trên {road}', 'Tiếp tục đi thẳng'],
-        'SlightRight': ['Chếch sang phải vào {road}', 'Chếch sang phải'],
-        'Right': ['Rẽ phải vào {road}', 'Rẽ phải'],
-        'SharpRight': ['Rẽ ngoặt sang phải vào {road}', 'Rẽ ngoặt sang phải'],
-        'TurnAround': ['Quay đầu lại vào {road}', 'Quay đầu lại'],
-        'SharpLeft': ['Rẽ ngoặt sang trái vào {road}', 'Rẽ ngoặt sang trái'],
-        'Left': ['Rẽ trái vào {road}', 'Rẽ trái'],
-        'SlightLeft': ['Chếch sang trái vào {road}', 'Chếch sang trái'],
-        'WaypointReached': ['Đã đến điểm dừng', 'Đã đến điểm dừng'],
-        'Roundabout': ['Đi vào vòng xuyến và đi theo lối ra thứ {exitStr} vào {road}', 'Đi vào vòng xuyến'],
-        'DestinationReached': ['Bạn đã đến nơi', 'Bạn đã đến nơi']
-    },
-    formatOrder: function(n) {
-        return n;
-    },
-    ui: {
-        startPlaceholder: 'Điểm xuất phát',
-        endPlaceholder: 'Điểm đến'
-    }
+    directions: { N: 'hướng Bắc', NE: 'hướng Đông Bắc', E: 'hướng Đông', SE: 'hướng Đông Nam', S: 'hướng Nam', SW: 'hướng Tây Nam', W: 'hướng Tây', NW: 'hướng Tây Bắc' },
+    instructions: { 'Head': ['Đi về {dir} trên {road}', 'Đi về {dir}'], 'Continue': ['Tiếp tục đi trên {road}', 'Tiếp tục đi thẳng'], 'SlightRight': ['Chếch sang phải vào {road}', 'Chếch sang phải'], 'Right': ['Rẽ phải vào {road}', 'Rẽ phải'], 'SharpRight': ['Rẽ ngoặt sang phải vào {road}', 'Rẽ ngoặt sang phải'], 'TurnAround': ['Quay đầu lại vào {road}', 'Quay đầu lại'], 'SharpLeft': ['Rẽ ngoặt sang trái vào {road}', 'Rẽ ngoặt sang trái'], 'Left': ['Rẽ trái vào {road}', 'Rẽ trái'], 'SlightLeft': ['Chếch sang trái vào {road}', 'Chếch sang trái'], 'WaypointReached': ['Đã đến điểm dừng', 'Đã đến điểm dừng'], 'Roundabout': ['Đi vào vòng xuyến và đi theo lối ra thứ {exitStr} vào {road}', 'Đi vào vòng xuyến'], 'DestinationReached': ['Bạn đã đến nơi', 'Bạn đã đến nơi'] },
+    formatOrder: function(n) { return n; },
+    ui: { startPlaceholder: 'Điểm xuất phát', endPlaceholder: 'Điểm đến' }
 };
 
-// 2. Khởi tạo tính năng chỉ đường (Bật lại language: 'vi')
 let routingControl = L.Routing.control({
     waypoints: [], 
     routeWhileDragging: false, 
-    lineOptions: {
-        styles: [{color: '#007bff', opacity: 0.7, weight: 6}] // Đường màu xanh
+    lineOptions: { 
+        styles: [{color: '#007bff', opacity: 0.9, weight: 6}],
+        extendToWaypoints: true,
+        missingRouteTolerance: 0 
+    },
+    showAlternatives: true,
+    altLineOptions: {
+        styles: [{color: '#70757a', opacity: 0.5, weight: 6}]
+    },
+    createMarker: function(i, waypoint, n) {
+        return null; 
     },
     show: true,
     addWaypoints: false,
-    language: 'vi' // Đã bật tiếng Việt thành công!
+    language: 'vi' 
 }).addTo(map);
 
-// Xóa đi các từ thừa tiếng Anh (như "on the left") mà server OSRM thỉnh thoảng hay chèn vào
 routingControl.getRouter().options.language = 'vi';
 
+// =================================================================
+// 1. LOGIC NÚT ĐỊNH VỊ NHẢY LÊN KHI CÓ BẢNG CHỈ ĐƯỜNG THU GỌN
+// =================================================================
+routingControl.on('routesfound', function(e) {
+    let container = document.querySelector('.leaflet-routing-container');
+    if (container) {
+        container.classList.remove('expanded');
+        container.classList.add('show-route', 'collapsed'); 
+    }
+    
+    // Đẩy nút định vị lên cao né cái bảng, CHƯA ẨN ĐI
+    let controls = document.querySelector('.leaflet-bottom.leaflet-right');
+    if (controls) {
+        controls.classList.remove('hide-controls');
+        controls.classList.add('lift-up');
+    }
+});
+
+routingControl.on('routingerror', function(e) {
+    let container = document.querySelector('.leaflet-routing-container');
+    if (container) container.classList.remove('show-route', 'collapsed', 'expanded');
+    
+    // Rút nút định vị về vị trí cũ dưới đáy
+    let controls = document.querySelector('.leaflet-bottom.leaflet-right');
+    if (controls) controls.classList.remove('hide-controls', 'lift-up');
+});
+
+// =================================================================
+// 2. VUỐT 3 CẤP ĐỘ: THU GỌN <-> MỞ RỘNG <-> ĐÓNG HOÀN TOÀN
+// =================================================================
+setTimeout(() => {
+    let routingContainer = document.querySelector('.leaflet-routing-container');
+    if (routingContainer) {
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+
+        routingContainer.addEventListener('touchstart', function(e) {
+            if (routingContainer.scrollTop > 0) return; 
+            startY = e.touches[0].clientY;
+            isDragging = true;
+            routingContainer.style.transition = 'none'; 
+        }, { passive: true });
+
+        routingContainer.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            currentY = e.touches[0].clientY;
+            let deltaY = currentY - startY;
+
+            if (routingContainer.classList.contains('collapsed')) {
+                routingContainer.style.transform = `translateY(${deltaY}px)`; 
+            } else if (routingContainer.classList.contains('expanded') && deltaY > 0) {
+                routingContainer.style.transform = `translateY(${deltaY}px)`;
+            }
+        }, { passive: true });
+
+        routingContainer.addEventListener('touchend', function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            routingContainer.style.transition = ''; 
+            
+            let deltaY = currentY - startY;
+            let controls = document.querySelector('.leaflet-bottom.leaflet-right');
+            
+            if (routingContainer.classList.contains('collapsed')) {
+                if (deltaY < -40) {
+                    // KÉO LÊN: Mở rộng bảng -> Ẩn nút định vị đi
+                    routingContainer.classList.remove('collapsed');
+                    routingContainer.classList.add('expanded');
+                    if (controls) controls.classList.add('hide-controls');
+                    
+                } else if (deltaY > 40) {
+                    // KÉO XUỐNG: Đóng hẳn -> Hiện lại nút và rớt xuống đáy
+                    routingContainer.classList.remove('show-route', 'collapsed', 'expanded');
+                    routingControl.setWaypoints([]); 
+                    if (controls) controls.classList.remove('hide-controls', 'lift-up');
+                }
+            } else if (routingContainer.classList.contains('expanded')) {
+                if (deltaY > 50 && routingContainer.scrollTop <= 0) {
+                    // KÉO XUỐNG TỪ TRÊN ĐỈNH: Thu gọn lại -> Hiện lại nút và bị đẩy lên cao
+                    routingContainer.classList.remove('expanded');
+                    routingContainer.classList.add('collapsed');
+                    if (controls) {
+                        controls.classList.remove('hide-controls');
+                        controls.classList.add('lift-up');
+                    }
+                }
+            }
+            routingContainer.style.transform = ''; 
+        });
+    }
+}, 1000); 
+
 L.control.locate({
-    position: 'topleft',
-    strings: { title: 'Xem vi tri cua toi' },
+    position: 'bottomright',
+    strings: { title: 'Vị trí của tôi' },
     setView: 'once',
     drawCircle: true,
     follow: true,
@@ -134,26 +212,98 @@ function removeVietnameseTones(str) {
     return str.replace(/[^a-z0-9]/g, ""); 
 }
 
+// =================================================================
+// 3. XỬ LÝ THẺ THÔNG TIN (INFO SHEET) CŨNG ĐẨY NÚT ĐỊNH VỊ LÊN
+// =================================================================
+function openInfoSheet(ten, phongCu, diaChi, sdt, lat, lng) {
+    let routingContainer = document.querySelector('.leaflet-routing-container');
+    if (routingContainer) {
+        routingContainer.classList.remove('show-route', 'expanded', 'collapsed'); 
+    }
+    if (typeof routingControl !== 'undefined') {
+        routingControl.setWaypoints([]); 
+    }
+
+    // Đẩy nút định vị lên cao để né Info Sheet
+    let controls = document.querySelector('.leaflet-bottom.leaflet-right');
+    if (controls) {
+        controls.classList.remove('hide-controls');
+        controls.classList.add('lift-up');
+    }
+
+    let sheet = document.getElementById('info-bottom-sheet');
+    
+    if (!sheet) {
+        sheet = document.createElement('div');
+        sheet.id = 'info-bottom-sheet';
+        sheet.className = 'bottom-sheet';
+        sheet.innerHTML = `
+            <div class="drag-handle"></div>
+            <button id="close-sheet-btn"><i class="fas fa-times"></i></button>
+            <div id="sheet-content"></div>
+        `;
+        document.body.appendChild(sheet);
+
+        // Đóng Info bằng nút X
+        document.getElementById('close-sheet-btn').addEventListener('click', function() {
+            sheet.classList.remove('show');
+            if (controls) controls.classList.remove('lift-up'); // Trả nút về đáy
+        });
+
+        // Đóng Info bằng cách vuốt xuống
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+
+        sheet.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+            isDragging = true;
+            sheet.style.transition = 'none'; 
+        }, { passive: true });
+
+        sheet.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            currentY = e.touches[0].clientY;
+            let deltaY = currentY - startY;
+            if (deltaY > 0) sheet.style.transform = `translateY(${deltaY}px)`; 
+        }, { passive: true });
+
+        sheet.addEventListener('touchend', function(e) {
+            isDragging = false;
+            sheet.style.transition = ''; 
+            let deltaY = currentY - startY;
+
+            if (deltaY > 100) { 
+                sheet.classList.remove('show');
+                if (controls) controls.classList.remove('lift-up'); // Trả nút về đáy
+                setTimeout(() => { sheet.style.transform = ''; }, 300); 
+            } else {
+                sheet.style.transform = '';
+            }
+        });
+    }
+
+    let contentHTML = `
+        <h4>${ten}</h4>
+        <p><b>Phường/xã cũ:</b> ${phongCu}</p>
+        <p><b>Địa chỉ:</b> ${diaChi}</p>
+        <p><b>SĐT:</b> ${sdt}</p>
+        <button class="route-btn" onclick="getRouteTo(${lat}, ${lng})">
+            <i class="fas fa-directions"></i> Chỉ đường
+        </button>
+    `;
+    
+    document.getElementById('sheet-content').innerHTML = contentHTML;
+    sheet.style.transform = ''; 
+    sheet.classList.add('show'); 
+    hideSuggestions(); 
+}
+
 function createMarker(feature, latlng) {
     var tenXa = feature.properties['Ten Phuong/Xa'] || 'UBND Xã';
     var phongCu = feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin';
     var diaChi = feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ';
     var sdt = feature.properties['So dien thoai'] || 'Chưa cập nhật';
-
-    // Đưa nút Chỉ đường vào Popup của dữ liệu thật
-    var popupContent = `
-        <div style="text-align: left;">
-            <h4 style="margin: 0 0 8px 0; color: #d32f2f;">${tenXa}</h4>
-            <p style="margin: 0 0 5px 0; font-size: 14px;"><b>Phường/xã cũ:</b> ${phongCu}</p>
-            <p style="margin: 0 0 5px 0; font-size: 14px;"><b>Địa chỉ:</b> ${diaChi}</p>
-            <p style="margin: 0 0 12px 0; font-size: 14px;"><b>SĐT:</b> ${sdt}</p>
-            
-            <button onclick="getRouteTo(${latlng.lat}, ${latlng.lng})" 
-                    style="background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px;">
-                <i class="fas fa-location-arrow"></i> Chỉ đường đến đây
-            </button>
-        </div>
-    `;
 
     var combinedHTML = `
         <div class="marker-with-label">
@@ -162,88 +312,73 @@ function createMarker(feature, latlng) {
         </div>
     `;
     
-    var labelIcon = L.divIcon({
-        className: 'custom-layer', 
-        html: combinedHTML,
-        iconSize: [0, 0], 
-        iconAnchor: [13, 13], 
-        popupAnchor: [0, -15] 
+    var labelIcon = L.divIcon({ className: 'custom-layer', html: combinedHTML, iconSize: [0, 0], iconAnchor: [13, 13], popupAnchor: [0, -15] });
+    let marker = L.marker(latlng, { icon: labelIcon });
+    
+    marker.on('click', function() {
+        map.flyTo(latlng, 15, { animate: true, duration: 1 });
+        openInfoSheet(tenXa, phongCu, diaChi, sdt, latlng.lat, latlng.lng);
     });
 
-    return L.marker(latlng, { icon: labelIcon }).bindPopup(popupContent);
+    return marker;
 }
 
-fetch(geoJsonUrl)
-    .then(response => {
-        if (!response.ok) throw new Error('Không tìm thấy file GeoJSON.');
-        return response.json();
-    })
-    .then(data => {
-        layerTatCa.clearLayers();
-        layerDaiDien.clearLayers();
-        allMarkers = [];
-        var tapDaiDien = [];
+setTimeout(function() {
+    fetch(geoJsonUrl)
+        .then(response => { if (!response.ok) throw new Error('Lỗi GeoJSON.'); return response.json(); })
+        .then(data => {
+            layerTatCa.clearLayers();
+            layerDaiDien.clearLayers();
+            allMarkers = [];
+            var tapDaiDien = [];
 
-        L.geoJSON(data, {
-            pointToLayer: function(feature, latlng) {
-                var marker = createMarker(feature, latlng);
-                var ten = feature.properties['Ten Phuong/Xa'] || 'Chưa có tên';
-                var phongCu = feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin';
-                
-                allMarkers.push({
-                    marker: marker,
-                    ten: ten,
-                    phongCu: phongCu,
-                    diaChi: feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ',
-                    latlng: latlng,
-                    tenKhongDau: removeVietnameseTones(ten),
-                    phongCuKhongDau: removeVietnameseTones(phongCu) 
-                });
-                
-                layerTatCa.addLayer(marker); 
-                return marker; 
-            }
-        }); 
-
-        data.features.forEach(currentFeature => {
-            var coords = currentFeature.geometry.coordinates;
-            var currentLatLng = L.latLng(coords[1], coords[0]); 
-            var hopLe = true;
-
-            for (var i = 0; i < tapDaiDien.length; i++) {
-                var repCoords = tapDaiDien[i].geometry.coordinates;
-                var repLatLng = L.latLng(repCoords[1], repCoords[0]);
-                if (currentLatLng.distanceTo(repLatLng) < (KHOANG_CACH_KM * 1000)) {
-                    hopLe = false;
-                    break;
+            L.geoJSON(data, {
+                pointToLayer: function(feature, latlng) {
+                    var marker = createMarker(feature, latlng);
+                    var ten = feature.properties['Ten Phuong/Xa'] || 'Chưa có tên';
+                    var phongCu = feature.properties['Xa/Phuong truoc sap nhap'] || 'Chưa có thông tin';
+                    
+                    allMarkers.push({
+                        marker: marker,
+                        ten: ten,
+                        phongCu: phongCu,
+                        diaChi: feature.properties['Dia chi chinh xac'] || 'Chưa có địa chỉ',
+                        sdt: feature.properties['So dien thoai'] || 'Chưa cập nhật',
+                        latlng: latlng,
+                        tenKhongDau: removeVietnameseTones(ten),
+                        phongCuKhongDau: removeVietnameseTones(phongCu) 
+                    });
+                    
+                    layerTatCa.addLayer(marker); 
+                    return marker; 
                 }
-            }
-            if (hopLe) tapDaiDien.push(currentFeature);
-        });
+            }); 
 
-        tapDaiDien.forEach(feature => {
-            var coords = feature.geometry.coordinates;
-            var latlng = L.latLng(coords[1], coords[0]);
-            var repMarker = createMarker(feature, latlng);
-            
-            repMarker.on('click', function() {
-                map.flyTo(latlng, ZOOM_MOC + 1, { animate: true, duration: 1.2 });
-                map.once('moveend', function() {
-                    var matched = allMarkers.find(m => m.latlng.lat === latlng.lat && m.latlng.lng === latlng.lng);
-                    if (matched) matched.marker.openPopup();
-                });
+            data.features.forEach(currentFeature => {
+                var coords = currentFeature.geometry.coordinates;
+                var currentLatLng = L.latLng(coords[1], coords[0]); 
+                var hopLe = true;
+                for (var i = 0; i < tapDaiDien.length; i++) {
+                    var repCoords = tapDaiDien[i].geometry.coordinates;
+                    var repLatLng = L.latLng(repCoords[1], repCoords[0]);
+                    if (currentLatLng.distanceTo(repLatLng) < (KHOANG_CACH_KM * 1000)) { hopLe = false; break; }
+                }
+                if (hopLe) tapDaiDien.push(currentFeature);
             });
-            
-            layerDaiDien.addLayer(repMarker);
-        });
 
-        if (map.getZoom() < ZOOM_MOC) map.addLayer(layerDaiDien);
-        else map.addLayer(layerTatCa);
+            tapDaiDien.forEach(feature => {
+                var coords = feature.geometry.coordinates;
+                var latlng = L.latLng(coords[1], coords[0]);
+                var repMarker = createMarker(feature, latlng);
+                layerDaiDien.addLayer(repMarker);
+            });
 
-        console.log('Đã nạp xong bản đồ!');
-        hideSuggestions();
-    })
-    .catch(error => console.error('Lỗi:', error));
+            if (map.getZoom() < ZOOM_MOC) map.addLayer(layerDaiDien);
+            else map.addLayer(layerTatCa);
+            hideSuggestions();
+        })
+        .catch(error => console.error('Lỗi:', error));
+}, 400);
 
 map.on('zoomend', function() {
     var currentZoom = map.getZoom();
@@ -267,11 +402,7 @@ function hienThiKetQuaTimKiem(keyword) {
 
     listDiv.innerHTML = '';
     var title = document.querySelector('#suggestions strong');
-    if (title) {
-        title.textContent = results.length > 0 
-            ? 'Kết quả tìm kiếm "' + keyword + '" (' + results.length + '):' 
-            : 'Kết quả tìm kiếm "' + keyword + '":';
-    }
+    if (title) title.textContent = results.length > 0 ? 'Kết quả tìm kiếm "' + keyword + '" (' + results.length + '):' : 'Kết quả tìm kiếm "' + keyword + '":';
 
     if (results.length === 0) {
         listDiv.innerHTML = '<div style="color:#888; padding:12px 0; text-align:center;">Không tìm thấy phường/xã có tên "' + keyword + '"</div>';
@@ -285,12 +416,14 @@ function hienThiKetQuaTimKiem(keyword) {
         var div = document.createElement('div');
         div.className = 'suggestion-item';
 
-        div.onclick = (function(marker, latlng) {
+        div.onclick = (function(info) {
             return function() {
-                map.flyTo(latlng, 16, { animate: true, duration: 1.5 });
-                map.once('moveend', function() { marker.openPopup(); });
+                map.flyTo(info.latlng, 16, { animate: true, duration: 1.5 });
+                map.once('moveend', function() { 
+                    openInfoSheet(info.ten, info.phongCu, info.diaChi, info.sdt, info.latlng.lat, info.latlng.lng);
+                });
             };
-        })(item.marker, item.latlng);
+        })(item);
 
         div.innerHTML = `
             <div class="suggestion-info">
@@ -318,13 +451,7 @@ function performSearch() {
     hienThiKetQuaTimKiem(keyword);
 }
 
-searchInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        clearTimeout(searchTimeout);
-        performSearch();
-    }
-});
-
+searchInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') { clearTimeout(searchTimeout); performSearch(); }});
 searchInput.addEventListener('input', function() {
     var keyword = this.value.trim();
     clearTimeout(searchTimeout);
@@ -338,22 +465,13 @@ searchInput.addEventListener('input', function() {
 });
 
 var closeSuggestionsBtn = document.getElementById('closeSuggestions');
-if (closeSuggestionsBtn) {
-    closeSuggestionsBtn.addEventListener('click', function() {
-        hideSuggestions();
-        if (searchInput) searchInput.value = '';
-    });
-}
+if (closeSuggestionsBtn) closeSuggestionsBtn.addEventListener('click', function() { hideSuggestions(); if (searchInput) searchInput.value = ''; });
 
 map.on('locationfound', function(e) {
     userLat = e.latlng.lat;
     userLng = e.latlng.lng;
-    if (!userClosedSuggestions && searchInput.value.trim() === '') {
-        timUBNDGanDay(userLat, userLng, currentRadius);
-    }
+    if (!userClosedSuggestions && searchInput.value.trim() === '') timUBNDGanDay(userLat, userLng, currentRadius);
 });
-
-map.on('locationerror', function(e) { console.warn('Không thể định vị:', e.message); });
 
 function tinhKhoangCach(lat1, lon1, lat2, lon2) {
     var R = 6371;
@@ -384,12 +502,14 @@ function hienThiGoiY(danhSach, banKinh) {
         var item = danhSach[i];
         var div = document.createElement('div');
         div.className = 'suggestion-item';
-        div.onclick = (function(marker, lat, lng) {
+        div.onclick = (function(info) {
             return function() {
-                map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
-                map.once('moveend', function() { marker.openPopup(); });
+                map.flyTo([info.lat, info.lng], 16, { animate: true, duration: 1.5 });
+                map.once('moveend', function() { 
+                    openInfoSheet(info.ten, info.phongCu, info.diaChi, info.sdt, info.lat, info.lng);
+                });
             };
-        })(item.marker, item.lat, item.lng);
+        })(item);
 
         var distStr = item.khoangCach < 1 ? (item.khoangCach * 1000).toFixed(0) + ' m' : item.khoangCach.toFixed(1) + ' km';
         div.innerHTML = `
@@ -418,8 +538,9 @@ function timUBNDGanDay(lat, lng, banKinh) {
             ketQua.push({
                 ten: markerInfo.ten,
                 diaChi: markerInfo.diaChi || 'Chưa có địa chỉ',
+                phongCu: markerInfo.phongCu,
+                sdt: markerInfo.sdt,
                 khoangCach: khoangCach,
-                marker: markerInfo.marker,
                 lat: lat2,
                 lng: lng2
             });
@@ -435,58 +556,47 @@ radiusBtns.forEach(function(btn) {
         this.classList.add('active');
         currentRadius = parseFloat(this.getAttribute('data-radius'));
         userClosedSuggestions = false;
-        if (userLat !== null && userLng !== null) {
-            timUBNDGanDay(userLat, userLng, currentRadius);
-        } else {
-            alert('Vui lòng định vị trước khi tìm kiếm.');
-        }
+        if (userLat !== null && userLng !== null) timUBNDGanDay(userLat, userLng, currentRadius);
+        else alert('Vui lòng định vị trước khi tìm kiếm.');
     });
 });
 
-const urlBoundary = 'data/hcm_new.geojson';
-fetch(urlBoundary)
-    .then(res => {
-        if (!res.ok) throw new Error('Không thể tải file ranh giới.');
-        return res.json();
-    })
-    .then(data => {
-        let worldCoords = [[-180, 90], [180, 90], [180, -90], [-180, -90], [-180, 90]];
-        let maskCoordinates = [worldCoords];
-        let allBoundaries = [];
+setTimeout(function() {
+    const urlBoundary = 'data/hcm_new.json';
+    fetch(urlBoundary)
+        .then(res => { if (!res.ok) throw new Error('Lỗi ranh giới'); return res.json(); })
+        .then(data => {
+            let maskCoordinates = [[[-180, 90], [180, 90], [180, -90], [-180, -90], [-180, 90]]];
+            let allBoundaries = [];
+            if (data.type === "FeatureCollection" && data.features) {
+                data.features.forEach(feature => {
+                    let geom = feature.geometry;
+                    allBoundaries.push(feature);
+                    if (geom.type === 'MultiPolygon') geom.coordinates.forEach(poly => { maskCoordinates.push([...poly[0]].reverse()); });
+                    else if (geom.type === 'Polygon') maskCoordinates.push([...geom.coordinates[0]].reverse());
+                });
+            }
+            const boundaryLayer = L.geoJSON(allBoundaries, { style: { color: '#ff1744', weight: 2, fillOpacity: 0 }, interactive: false }).addTo(map);
+            L.geoJSON({ "type": "Feature", "geometry": { "type": "Polygon", "coordinates": maskCoordinates } }, { style: { color: 'transparent', fillColor: '#1a1a2e', fillOpacity: 0.7, fillRule: 'evenodd', className: 'map-mask' }, interactive: false }).addTo(map);
+            map.fitBounds(boundaryLayer.getBounds());
+        })
+        .catch(error => console.error('Lỗi ranh giới:', error));
+}, 800);
 
-        if (data.type === "FeatureCollection" && data.features) {
-            data.features.forEach(feature => {
-                let geom = feature.geometry;
-                allBoundaries.push(feature);
-                if (geom.type === 'MultiPolygon') {
-                    geom.coordinates.forEach(poly => { maskCoordinates.push([...poly[0]].reverse()); });
-                } else if (geom.type === 'Polygon') {
-                    maskCoordinates.push([...geom.coordinates[0]].reverse());
-                }
-            });
-        }
-
-        const boundaryLayer = L.geoJSON(allBoundaries, {
-            style: { color: '#ff1744', weight: 2, fillOpacity: 0 },
-            interactive: false
-        }).addTo(map);
-
-        L.geoJSON({
-            "type": "Feature",
-            "geometry": { "type": "Polygon", "coordinates": maskCoordinates }
-        }, {
-            style: { color: 'transparent', fillColor: '#1a1a2e', fillOpacity: 0.7, fillRule: 'evenodd', className: 'map-mask' },
-            interactive: false
-        }).addTo(map);
-
-        map.fitBounds(boundaryLayer.getBounds());
-    })
-    .catch(error => console.error('Lỗi khi tải file ranh giới:', error));
+// Đóng Info khi chạm ra bản đồ cũng phải rút nút về lại đáy
+map.on('click', function() {
+    let sheet = document.getElementById('info-bottom-sheet');
+    if (sheet && sheet.classList.contains('show')) {
+        sheet.classList.remove('show');
+        let controls = document.querySelector('.leaflet-bottom.leaflet-right');
+        if (controls) controls.classList.remove('lift-up');
+    }
+});
 
 map.on('mousedown touchstart dragstart wheel', function() {
     if (suggestionsContainer && !suggestionsContainer.classList.contains('suggestions-hidden')) {
         hideSuggestions();
-        userClosedSuggestions = true
+        userClosedSuggestions = true;
     }
 });
 
@@ -505,58 +615,29 @@ function enableAutoHide() {
 }
 setTimeout(enableAutoHide, 1000);
 
-let marker = L.marker([destLat, destLng]).addTo(map);
-
-let popupContent = `
-    <div style="text-align: center;">
-        <h4 style="margin: 0 0 5px 0;">Đối tượng: Sinh viên</h4>
-        <p style="margin: 0 0 10px 0;">Chưa khám y tế</p>
-        <button onclick="getRouteTo(${destLat}, ${destLng})" 
-                style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">
-            <i class="fas fa-location-arrow"></i> Chỉ đường đến đây
-        </button>
-    </div>
-`;
-
-marker.bindPopup(popupContent);
-
 function getRouteTo(lat, lng) {
-    map.closePopup();
+    let sheet = document.getElementById('info-bottom-sheet');
+    if (sheet) sheet.classList.remove('show');
 
-    // 1. Ưu tiên xài tọa độ đã có sẵn nếu bạn đã bấm nút Định vị trước đó
-    // Cách này giúp đường vẽ ra ngay lập tức, không bị Safari chặn
     if (userLat !== null && userLng !== null) {
-        routingControl.setWaypoints([
-            L.latLng(userLat, userLng),
-            L.latLng(lat, lng)
-        ]);
-        return; // Dừng hàm tại đây, không xin quyền GPS nữa
+        routingControl.setWaypoints([ L.latLng(userLat, userLng), L.latLng(lat, lng) ]);
+        return; 
     }
 
-    // 2. Nếu chưa có tọa độ, yêu cầu trình duyệt lấy vị trí
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(pos) {
-                // Cập nhật luôn tọa độ vào biến dùng chung
                 userLat = pos.coords.latitude;
                 userLng = pos.coords.longitude;
-                
-                routingControl.setWaypoints([
-                    L.latLng(userLat, userLng),
-                    L.latLng(lat, lng)
-                ]);
+                routingControl.setWaypoints([ L.latLng(userLat, userLng), L.latLng(lat, lng) ]);
             }, 
             function(err) {
                 console.warn("Lỗi GPS:", err);
                 alert("Không thể lấy vị trí của bạn! Lỗi hệ thống báo: " + err.message);
             }, 
-            {
-                enableHighAccuracy: true,
-                timeout: 15000, // Tăng lên 15 giây để Safari có đủ thời gian phản hồi
-                maximumAge: 0
-            }
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
     } else {
-        alert("Trình duyệt hoặc thiết bị của bạn không hỗ trợ tính năng định vị.");
+        alert("Trình duyệt không hỗ trợ tính năng định vị.");
     }
 }

@@ -1,4 +1,6 @@
-/* Reset va bien */
+/* =======================================================
+   1. RESET VÀ BIẾN TOÀN CỤC
+   ======================================================= */
 * {
     margin: 0;
     padding: 0;
@@ -22,8 +24,7 @@
     --transition: all 0.3s ease;
 }
 
-html,
-body {
+html, body {
     height: 100%;
     font-family: Arial, Helvetica, sans-serif;
     background: var(--background);
@@ -35,7 +36,9 @@ body {
     flex-direction: column;
 }
 
-/* Header - Xanh la */
+/* =======================================================
+   2. HEADER & SEARCH
+   ======================================================= */
 #header {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
@@ -100,7 +103,9 @@ body {
     transform: scale(1.01);
 }
 
-/* Huong dan nhanh */
+/* =======================================================
+   3. HƯỚNG DẪN & CHỌN BÁN KÍNH
+   ======================================================= */
 #quick-guide {
     background: #e8f5e9;
     padding: 5px 16px;
@@ -120,7 +125,6 @@ body {
     color: var(--primary);
 }
 
-/* Chon ban kinh */
 #radius-selector {
     background: #ffffff;
     padding: 8px 20px;
@@ -164,7 +168,9 @@ body {
     box-shadow: 0 2px 12px rgba(46, 125, 50, 0.4);
 }
 
-/* Vung goi y */
+/* =======================================================
+   4. VÙNG GỢI Ý TÌM KIẾM
+   ======================================================= */
 #suggestions {
     background: #ffffff;
     border-bottom: 1px solid #e8e8e8;
@@ -174,7 +180,16 @@ body {
     font-size: 0.9rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     flex-shrink: 0;
-    transition: var(--transition);
+    transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease !important;
+}
+
+.suggestions-hidden {
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    opacity: 0 !important;
+    border-bottom: none !important;
+    overflow: hidden !important;
 }
 
 #suggestions-header {
@@ -270,7 +285,22 @@ body {
     user-select: none;
 }
 
-/* Ban do */
+#suggestions::-webkit-scrollbar {
+    width: 4px;
+}
+
+#suggestions::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+#suggestions::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+/* =======================================================
+   5. BẢN ĐỒ & TÙY CHỈNH LEAFLET
+   ======================================================= */
 #map {
     flex: 1;
     width: 100%;
@@ -279,7 +309,382 @@ body {
     position: relative;
 }
 
-/* Footer - Don gian */
+/* Tắt logo leaflet */
+.leaflet-control-attribution {
+    display: none !important;
+}
+
+.leaflet-bottom.leaflet-right {
+    bottom: 20px !important;
+    right: 10px !important;
+    /* Bổ sung thêm hiệu ứng mượt khi thay đổi thuộc tính bottom */
+    transition: transform 0.4s ease, opacity 0.4s ease, bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* TRẠNG THÁI 1: Bị đẩy lên cao để né bảng thu gọn / thẻ info */
+.leaflet-bottom.leaflet-right.lift-up {
+    bottom: 140px !important; /* Đẩy cao lên 140px để nằm gọn trên cái bảng trắng */
+}
+
+/* TRẠNG THÁI 2: Ẩn đi khi bảng bung lên hết (Vuốt lên) */
+.leaflet-bottom.leaflet-right.hide-controls {
+    transform: translateX(150%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Làm tròn các nút bấm giống Google */
+.leaflet-bar {
+    border: none !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+.leaflet-bar a {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    color: #444 !important;
+}
+
+/* Tùy chỉnh Popup (nếu còn dùng) */
+.leaflet-popup {
+    z-index: 10000 !important;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 12px !important;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.2) !important;
+    padding: 4px 0 !important;
+}
+
+.leaflet-popup-content {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    padding: 10px 12px !important;
+    margin: 10px !important;
+    min-width: 180px;
+    max-width: 300px;
+}
+
+.leaflet-popup-content b {
+    color: var(--primary-dark);
+    font-size: 1rem;
+}
+
+.leaflet-popup-tip {
+    background: white !important;
+}
+
+/* =======================================================
+   6. BẢNG CHỈ ĐƯỜNG (GOOGLE MAPS CLONE - CÓ VUỐT 3 CẤP ĐỘ)
+   ======================================================= */
+.leaflet-routing-container {
+    font-family: 'Segoe UI', Arial, sans-serif !important;
+    font-size: 14px;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 24px 10px 10px 10px !important; 
+    background: white !important;
+    border-radius: 20px 20px 0 0 !important; 
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15) !important;
+    z-index: 2000 !important;
+    
+    /* Ẩn mặc định (Nằm dưới đáy màn hình) */
+    transform: translateY(120%); 
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s ease, max-height 0.4s ease !important; 
+}
+
+/* TRẠNG THÁI 1: THU GỌN (Chỉ hiện khoảng cách / thời gian) */
+.leaflet-routing-container.show-route.collapsed {
+    transform: translateY(0) !important;
+    height: auto !important;
+    max-height: 18vh !important;
+    overflow: hidden !important; /* Không cho cuộn */
+}
+.leaflet-routing-container.show-route.collapsed table {
+    display: none !important; /* Giấu bước đi chi tiết */
+}
+
+/* TRẠNG THÁI 2: MỞ RỘNG (Hiện full hướng dẫn) */
+.leaflet-routing-container.show-route.expanded {
+    transform: translateY(0) !important;
+    height: 55vh !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+}
+.leaflet-routing-container.show-route.expanded table {
+    display: table !important; /* Hiện lại bước đi */
+}
+
+/* Thanh gạt ngang chuẩn Google */
+.leaflet-routing-container::before {
+    content: '';
+    position: absolute; 
+    top: 10px;           
+    left: 50%;          
+    transform: translateX(-50%); 
+    width: 36px;
+    height: 5px;
+    background: #dadce0;
+    border-radius: 5px;
+    z-index: 9999;      
+    display: block;
+}
+
+/* Ẩn cái dấu X nhỏ xíu mặc định của thư viện đi */
+.leaflet-routing-collapse-btn {
+    display: none !important;
+}
+
+/* Khôi phục hiển thị tuyến đường chính */
+.leaflet-routing-container .leaflet-routing-alt {
+    display: block !important; 
+}
+
+/* ---------------------------------------------------
+   TẠO CARD THU GỌN CHO TUYẾN ĐƯỜNG PHỤ (OPTION 2)
+--------------------------------------------------- */
+.leaflet-routing-container .leaflet-routing-alt-minimized {
+    display: block !important;
+    background: #f8f9fa; /* Màu nền xám nhạt */
+    border-radius: 12px;
+    padding: 12px 15px !important;
+    margin-top: 15px;
+    border: 1px solid #e0e0e0;
+    opacity: 0.8;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hiệu ứng khi người dùng chạm/nhấn vào Option 2 */
+.leaflet-routing-container .leaflet-routing-alt-minimized:hover {
+    opacity: 1;
+    background: #e8eaed;
+    border-color: #d1d3d4;
+}
+
+/* Giấu đi danh sách các bước rẽ của đường phụ cho đỡ rối */
+.leaflet-routing-container .leaflet-routing-alt-minimized table {
+    display: none !important;
+}
+
+/* Định dạng lại tiêu đề của đường phụ cho đẹp */
+.leaflet-routing-container .leaflet-routing-alt-minimized h2 {
+    font-size: 1rem !important;
+    color: #5f6368 !important;
+    margin-bottom: 5px !important;
+}
+.leaflet-routing-container .leaflet-routing-alt-minimized h3 {
+    font-size: 0.9rem !important;
+    color: #1a73e8 !important; /* Chữ xanh dương nổi bật thời gian đi */
+}
+
+/* Fix lỗi dính chữ và làm đẹp bảng chỉ đường chính */
+.leaflet-routing-alt table tbody tr td {
+    padding: 8px 5px !important;
+    line-height: 1.5;
+}
+
+.leaflet-routing-alt table tbody tr td:last-child {
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 15px !important;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.leaflet-routing-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.leaflet-routing-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 5px;
+}
+
+
+/* =======================================================
+   7. THẺ THÔNG TIN BOTTOM SHEET (GOOGLE MAPS CLONE)
+   ======================================================= */
+.bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border-radius: 24px 24px 0 0; /* Bo tròn 2 góc trên */
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    padding: 12px 20px 30px 20px;
+    z-index: 2500; /* Nổi lên trên cùng */
+    
+    /* Hiệu ứng trượt */
+    transform: translateY(120%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.bottom-sheet.show {
+    transform: translateY(0);
+}
+
+.drag-handle {
+    width: 40px;
+    height: 5px;
+    background: #dadce0;
+    border-radius: 5px;
+    margin: 0 auto 15px auto;
+}
+
+#close-sheet-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #f1f3f4;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5f6368;
+    font-size: 16px;
+    transition: background 0.2s;
+}
+
+#close-sheet-btn:hover {
+    background: #e8eaed;
+}
+
+#sheet-content h4 { 
+    margin: 0 0 10px 0; 
+    font-size: 1.3rem; 
+    color: #202124; 
+    padding-right: 35px; /* Né cái nút X ra */
+}
+
+#sheet-content p { 
+    margin: 6px 0; 
+    font-size: 0.95rem; 
+    color: #5f6368; 
+    line-height: 1.4;
+}
+
+#sheet-content p b {
+    color: #3c4043;
+}
+
+/* Nút chỉ đường màu xanh dương GG Maps */
+.route-btn {
+    background: #0b57d0; 
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    transition: background 0.2s;
+}
+
+.route-btn:hover {
+    background: #0842a0;
+}
+
+/* =======================================================
+   8. CUSTOM MARKER & LAYERS
+   ======================================================= */
+.marker-with-label {
+    display: flex;
+    align-items: center; 
+    gap: 8px; 
+    position: relative;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    pointer-events: none; 
+}
+
+.marker-with-label:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.gg-pin {
+    width: 26px; 
+    height: 26px;
+    background-color: #EA4335;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    position: relative;
+    pointer-events: auto;
+    cursor: pointer;
+    flex-shrink: 0; 
+}
+
+.gg-pin::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #900C3F;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.pin-label {
+    color: #EA4335; 
+    font-weight: bold;
+    font-size: 0.95rem;
+    white-space: nowrap; 
+    text-shadow: 
+        1px 1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px -1px 0 #fff,
+        0px 0px 4px #fff;
+    pointer-events: auto; 
+    cursor: pointer;
+}
+
+.hide-our-markers .marker-cluster,
+.hide-our-markers .custom-layer {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important; 
+    transition: opacity 0.2s ease-in-out; 
+}
+
+/* Ranh giới TP.HCM */
+.hcm-border {
+    filter: drop-shadow(0 0 8px rgba(255, 23, 68, 0.3));
+}
+
+.hcm-mask {
+    stroke: #ff1744;
+    stroke-width: 2px;
+    stroke-opacity: 0.8;
+    fill: rgba(26, 26, 46, 0.7);
+    fill-rule: evenodd;
+    filter: drop-shadow(0 0 12px rgba(255, 23, 68, 0.15));
+}
+
+/* =======================================================
+   9. FOOTER
+   ======================================================= */
 #footer {
     background: linear-gradient(135deg, #1a1a2e, #16213e);
     color: rgba(255, 255, 255, 0.7);
@@ -287,6 +692,17 @@ body {
     flex-shrink: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     text-align: center;
+    transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease;
+    max-height: 150px;
+    overflow: hidden;
+}
+
+.footer-hidden {
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    opacity: 0 !important;
+    border: none !important;
 }
 
 .footer-content {
@@ -343,234 +759,82 @@ body {
     color: rgba(255, 255, 255, 0.35);
 }
 
-/* Ghi de Leaflet */
-.leaflet-control-attribution {
-    display: none !important;
-}
-
-.leaflet-bottom.leaflet-right {
-    display: none !important;
-}
-
-.leaflet-popup-content-wrapper {
-    border-radius: var(--radius) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-    padding: 4px 0 !important;
-}
-
-.leaflet-popup-content {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    padding: 4px 12px !important;
-    min-width: 180px;
-    max-width: 300px;
-}
-
-.leaflet-popup-content b {
-    color: var(--primary-dark);
-    font-size: 1rem;
-}
-
-.leaflet-popup-tip {
-    background: white !important;
-}
-
-/* Scrollbar */
-#suggestions::-webkit-scrollbar {
-    width: 4px;
-}
-
-#suggestions::-webkit-scrollbar-track {
-    background: #f0f0f0;
-}
-
-#suggestions::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 10px;
-}
-
-.marker-with-label {
-    display: flex;
-    align-items: center; 
-    gap: 8px; 
-    position: relative;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    pointer-events: none; 
-}
-
-.gg-pin {
-    width: 26px; 
-    height: 26px;
-    background-color: #EA4335;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    position: relative;
-    pointer-events: auto;
-    cursor: pointer;
-    flex-shrink: 0; 
-}
-
-
-.gg-pin::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    background-color: #900C3F;
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-
-.pin-label {
-    color: #EA4335; 
-    font-weight: bold;
-    font-size: 0.95rem;
-    white-space: nowrap; 
-    
-    
-    text-shadow: 
-        1px 1px 0 #fff,
-        -1px 1px 0 #fff,
-        1px -1px 0 #fff,
-        -1px -1px 0 #fff,
-        0px 0px 4px #fff;
-    pointer-events: auto; 
-    cursor: pointer;
-}
-
-
+/* =======================================================
+   10. RESPONSIVE QUERIES (PHẢI LUÔN NẰM Ở DƯỚI CÙNG)
+   ======================================================= */
 @media (max-width: 768px) {
     .pin-label {
         font-size: 0.8rem;
     }
 }
 
-
-.marker-with-label:hover {
-    transform: scale(1.1);
-    transition: transform 0.2s ease-in-out;
-}
-
-/* Ranh gioi */
-.hcm-border {
-    filter: drop-shadow(0 0 8px rgba(255, 23, 68, 0.3));
-}
-
-.hcm-mask {
-    stroke: #ff1744;
-    stroke-width: 2px;
-    stroke-opacity: 0.8;
-    fill: rgba(26, 26, 46, 0.7);
-    fill-rule: evenodd;
-    filter: drop-shadow(0 0 12px rgba(255, 23, 68, 0.15));
-}
-
-/* Responsive mobile - TOI UU CHO PHONE */
+/* TỐI ƯU CHO PHONE */
 @media (max-width: 640px) {
-    #radius-selector {
-        padding: 4px 12px;
-        gap: 8px;
-        font-size: 0.8rem;
-        overflow-x: auto;
-        justify-content: flex-start; 
-    }
-
-
     #header h1 {
         font-size: 0.9rem;
         justify-content: center;
     }
-
     #header h1::before {
         font-size: 1rem;
     }
-
     #search-box {
         max-width: 100%;
         min-width: 0;
     }
-
     #searchInput {
         font-size: 1rem;
         padding: 12px 16px;
         min-height: 48px;
     }
-
     #quick-guide {
         display: none;
     }
-
+    
     #radius-selector {
-    background: #ffffff;
-    padding: 6px 16px;
-    border-bottom: 1px solid #e8e8e8;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: nowrap;          
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    overflow-x: auto;           
-    white-space: nowrap;        
-}
-
+        padding: 6px 16px;
+        gap: 12px;
+        flex-wrap: nowrap;          
+        font-size: 0.9rem;
+        overflow-x: auto;           
+        white-space: nowrap;
+        justify-content: flex-start;        
+    }
     #radius-selector > span {
-    font-weight: 600;
-    color: var(--text-dark);
-    font-size: 0.85rem;
-    flex-shrink: 0;             
-}
-
+        flex-shrink: 0;             
+    }
     .radius-btn {
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 4px 14px;
-    cursor: pointer;
-    transition: var(--transition);
-    font-weight: 500;
-    font-size: 0.85rem;
-    background: #f0f2f5;
-    color: var(--text-dark);
-    min-height: 30px;
-    flex-shrink: 0;
-}
+        padding: 4px 14px;
+        min-height: 30px;
+        flex-shrink: 0;
+    }
 
     #suggestions {
         max-height: 180px;
         padding: 8px 12px;
         font-size: 0.85rem;
     }
-
     #suggestions-header strong {
         font-size: 0.85rem;
     }
-
     #suggestions-list .suggestion-item {
         padding: 14px 12px;
         min-height: 52px;
         flex-wrap: wrap;
         gap: 4px;
     }
-
     #suggestions-list .suggestion-info strong {
         font-size: 0.85rem;
     }
-
     #suggestions-list .suggestion-info span {
         font-size: 0.75rem;
         white-space: normal;
     }
-
     #suggestions-list .suggestion-distance {
         font-size: 0.7rem;
         margin-left: 0;
         padding: 1px 8px;
         order: 2;
     }
-
     #suggestions-list .suggestion-link {
         font-size: 0.75rem;
         padding: 4px 10px;
@@ -583,24 +847,19 @@ body {
     #footer {
         padding: 6px 10px;
     }
-
     .footer-logo img {
         height: 28px;
         max-height: 28px;
     }
-
     .footer-divider {
         font-size: 1rem;
     }
-
     .footer-text span:first-child {
         font-size: 0.65rem;
     }
-
     .footer-text span:nth-child(2) {
         font-size: 0.55rem;
     }
-
     .footer-text span:last-child {
         font-size: 0.5rem;
     }
@@ -614,109 +873,29 @@ body {
         min-width: 140px;
         max-width: 220px;
         padding: 4px 8px !important;
+        margin: 5px !important;
     }
-
     .leaflet-popup-content b {
         font-size: 0.9rem;
     }
-
-    .marker-government {
-        width: 30px;
-        height: 30px;
-    }
-
-    .marker-government i {
-        font-size: 13px;
-    }
 }
 
-/* Responsive tablet */
+/* RESPONSIVE TABLET */
 @media (min-width: 641px) and (max-width: 1024px) {
     #header {
         padding: 12px 18px;
     }
-
     #header h1 {
         font-size: 1.1rem;
     }
-
     #search-box {
         max-width: 380px;
     }
-
     #suggestions {
         max-height: 200px;
     }
-
     .footer-logo img {
         height: 32px;
         max-height: 32px;
     }
-}
-
-
-
-.leaflet-popup {
-    z-index: 10000 !important;
-}
-
-#footer {
-   
-    transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease;
-    max-height: 150px;
-    overflow: hidden;
-}
-
-.footer-hidden {
-    max-height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    opacity: 0 !important;
-    border: none !important;
-}
-
-
-.hide-our-markers .marker-cluster,
-.hide-our-markers .custom-layer {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important; 
-    transition: opacity 0.2s ease-in-out; 
-}
-
-
-#suggestions {
-    
-    transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.4s ease !important;
-}
-
-.suggestions-hidden {
-    
-    max-height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    opacity: 0 !important;
-    border-bottom: none !important;
-    overflow: hidden !important;
-}
-
-/* Fix lỗi font tiếng Việt cho bảng chỉ đường */
-.leaflet-routing-container {
-    font-family: 'Segoe UI', Arial, sans-serif !important;
-    font-size: 14px;
-}
-
-/* Fix lỗi dính chữ (vd: Đường Số 38555 m) */
-.leaflet-routing-alt table tbody tr td {
-    padding: 8px 5px !important;
-    line-height: 1.5;
-}
-
-/* Đẩy khoảng cách (mét/km) cách xa tên đường một chút */
-.leaflet-routing-alt table tbody tr td:last-child {
-    white-space: nowrap;
-    text-align: right;
-    padding-left: 15px !important;
-    font-weight: bold;
-    color: #007bff;
 }
