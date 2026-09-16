@@ -309,7 +309,6 @@ body {
     position: relative;
 }
 
-/* Tắt logo leaflet */
 .leaflet-control-attribution {
     display: none !important;
 }
@@ -317,23 +316,19 @@ body {
 .leaflet-bottom.leaflet-right {
     bottom: 20px !important;
     right: 10px !important;
-    /* Bổ sung thêm hiệu ứng mượt khi thay đổi thuộc tính bottom */
     transition: transform 0.4s ease, opacity 0.4s ease, bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* TRẠNG THÁI 1: Bị đẩy lên cao để né bảng thu gọn / thẻ info */
 .leaflet-bottom.leaflet-right.lift-up {
-    bottom: 140px !important; /* Đẩy cao lên 140px để nằm gọn trên cái bảng trắng */
+    bottom: 140px !important; 
 }
 
-/* TRẠNG THÁI 2: Ẩn đi khi bảng bung lên hết (Vuốt lên) */
 .leaflet-bottom.leaflet-right.hide-controls {
     transform: translateX(150%);
     opacity: 0;
     pointer-events: none;
 }
 
-/* Làm tròn các nút bấm giống Google */
 .leaflet-bar {
     border: none !important;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
@@ -348,7 +343,6 @@ body {
     color: #444 !important;
 }
 
-/* Tùy chỉnh Popup (nếu còn dùng) */
 .leaflet-popup {
     z-index: 10000 !important;
 }
@@ -378,7 +372,7 @@ body {
 }
 
 /* =======================================================
-   6. BẢNG CHỈ ĐƯỜNG (GOOGLE MAPS CLONE - CÓ VUỐT 3 CẤP ĐỘ)
+   6. BẢNG CHỈ ĐƯỜNG (GOOGLE MAPS CLONE)
    ======================================================= */
 .leaflet-routing-container {
     font-family: 'Segoe UI', Arial, sans-serif !important;
@@ -394,34 +388,36 @@ body {
     box-shadow: 0 -4px 20px rgba(0,0,0,0.15) !important;
     z-index: 2000 !important;
     
-    /* Ẩn mặc định (Nằm dưới đáy màn hình) */
+    height: auto !important; 
     transform: translateY(120%); 
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s ease, max-height 0.4s ease !important; 
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; 
 }
 
-/* TRẠNG THÁI 1: THU GỌN (Chỉ hiện khoảng cách / thời gian) */
 .leaflet-routing-container.show-route.collapsed {
     transform: translateY(0) !important;
-    height: auto !important;
-    max-height: 18vh !important;
-    overflow: hidden !important; /* Không cho cuộn */
-}
-.leaflet-routing-container.show-route.collapsed table {
-    display: none !important; /* Giấu bước đi chi tiết */
+    max-height: 100px !important; 
+    overflow: hidden !important; 
+    cursor: pointer; 
 }
 
-/* TRẠNG THÁI 2: MỞ RỘNG (Hiện full hướng dẫn) */
+.leaflet-routing-container.show-route.collapsed table {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
 .leaflet-routing-container.show-route.expanded {
     transform: translateY(0) !important;
-    height: 55vh !important;
-    max-height: 60vh !important;
+    max-height: 42vh !important; 
     overflow-y: auto !important;
 }
+
 .leaflet-routing-container.show-route.expanded table {
-    display: table !important; /* Hiện lại bước đi */
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.4s ease 0.15s; 
 }
 
-/* Thanh gạt ngang chuẩn Google */
 .leaflet-routing-container::before {
     content: '';
     position: absolute; 
@@ -436,55 +432,14 @@ body {
     display: block;
 }
 
-/* Ẩn cái dấu X nhỏ xíu mặc định của thư viện đi */
 .leaflet-routing-collapse-btn {
     display: none !important;
 }
 
-/* Khôi phục hiển thị tuyến đường chính */
 .leaflet-routing-container .leaflet-routing-alt {
     display: block !important; 
 }
 
-/* ---------------------------------------------------
-   TẠO CARD THU GỌN CHO TUYẾN ĐƯỜNG PHỤ (OPTION 2)
---------------------------------------------------- */
-.leaflet-routing-container .leaflet-routing-alt-minimized {
-    display: block !important;
-    background: #f8f9fa; /* Màu nền xám nhạt */
-    border-radius: 12px;
-    padding: 12px 15px !important;
-    margin-top: 15px;
-    border: 1px solid #e0e0e0;
-    opacity: 0.8;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-}
-
-/* Hiệu ứng khi người dùng chạm/nhấn vào Option 2 */
-.leaflet-routing-container .leaflet-routing-alt-minimized:hover {
-    opacity: 1;
-    background: #e8eaed;
-    border-color: #d1d3d4;
-}
-
-/* Giấu đi danh sách các bước rẽ của đường phụ cho đỡ rối */
-.leaflet-routing-container .leaflet-routing-alt-minimized table {
-    display: none !important;
-}
-
-/* Định dạng lại tiêu đề của đường phụ cho đẹp */
-.leaflet-routing-container .leaflet-routing-alt-minimized h2 {
-    font-size: 1rem !important;
-    color: #5f6368 !important;
-    margin-bottom: 5px !important;
-}
-.leaflet-routing-container .leaflet-routing-alt-minimized h3 {
-    font-size: 0.9rem !important;
-    color: #1a73e8 !important; /* Chữ xanh dương nổi bật thời gian đi */
-}
-
-/* Fix lỗi dính chữ và làm đẹp bảng chỉ đường chính */
 .leaflet-routing-alt table tbody tr td {
     padding: 8px 5px !important;
     line-height: 1.5;
@@ -507,9 +462,8 @@ body {
     border-radius: 5px;
 }
 
-
 /* =======================================================
-   7. THẺ THÔNG TIN BOTTOM SHEET (GOOGLE MAPS CLONE)
+   7. THẺ THÔNG TIN BOTTOM SHEET (CÓ 2 NÚT BẤM)
    ======================================================= */
 .bottom-sheet {
     position: fixed;
@@ -517,15 +471,13 @@ body {
     left: 0;
     width: 100%;
     background: #fff;
-    border-radius: 24px 24px 0 0; /* Bo tròn 2 góc trên */
+    border-radius: 24px 24px 0 0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
     padding: 12px 20px 30px 20px;
-    z-index: 2500; /* Nổi lên trên cùng */
+    z-index: 2500;
     
-    /* Hiệu ứng trượt */
     transform: translateY(120%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
     display: flex;
     flex-direction: column;
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -569,7 +521,7 @@ body {
     margin: 0 0 10px 0; 
     font-size: 1.3rem; 
     color: #202124; 
-    padding-right: 35px; /* Né cái nút X ra */
+    padding-right: 35px;
 }
 
 #sheet-content p { 
@@ -583,25 +535,54 @@ body {
     color: #3c4043;
 }
 
-/* Nút chỉ đường màu xanh dương GG Maps */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
+}
+
 .route-btn {
     background: #0b57d0; 
     color: white;
     border: none;
-    padding: 10px 24px;
+    padding: 10px 10px;
     border-radius: 20px;
     cursor: pointer;
     font-weight: 500;
-    font-size: 1rem;
-    display: inline-flex;
+    font-size: 0.95rem;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 15px;
+    justify-content: center;
+    flex: 1; 
+    gap: 6px;
     transition: background 0.2s;
 }
 
 .route-btn:hover {
     background: #0842a0;
+}
+
+.gg-map-btn {
+    background: #fff; 
+    color: #0b57d0;
+    border: 1px solid #0b57d0;
+    padding: 10px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1; 
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.gg-map-btn:hover {
+    background: #f0f4f9;
 }
 
 /* =======================================================
@@ -650,12 +631,7 @@ body {
     font-weight: bold;
     font-size: 0.95rem;
     white-space: nowrap; 
-    text-shadow: 
-        1px 1px 0 #fff,
-        -1px 1px 0 #fff,
-        1px -1px 0 #fff,
-        -1px -1px 0 #fff,
-        0px 0px 4px #fff;
+    text-shadow: 1px 1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff, 0px 0px 4px #fff;
     pointer-events: auto; 
     cursor: pointer;
 }
@@ -668,7 +644,6 @@ body {
     transition: opacity 0.2s ease-in-out; 
 }
 
-/* Ranh giới TP.HCM */
 .hcm-border {
     filter: drop-shadow(0 0 8px rgba(255, 23, 68, 0.3));
 }
@@ -760,7 +735,7 @@ body {
 }
 
 /* =======================================================
-   10. RESPONSIVE QUERIES (PHẢI LUÔN NẰM Ở DƯỚI CÙNG)
+   10. RESPONSIVE QUERIES
    ======================================================= */
 @media (max-width: 768px) {
     .pin-label {
@@ -768,7 +743,6 @@ body {
     }
 }
 
-/* TỐI ƯU CHO PHONE */
 @media (max-width: 640px) {
     #header h1 {
         font-size: 0.9rem;
@@ -789,7 +763,6 @@ body {
     #quick-guide {
         display: none;
     }
-    
     #radius-selector {
         padding: 6px 16px;
         gap: 12px;
@@ -807,7 +780,6 @@ body {
         min-height: 30px;
         flex-shrink: 0;
     }
-
     #suggestions {
         max-height: 180px;
         padding: 8px 12px;
@@ -843,7 +815,6 @@ body {
         order: 3;
         flex: 0 0 auto;
     }
-
     #footer {
         padding: 6px 10px;
     }
@@ -863,11 +834,9 @@ body {
     .footer-text span:last-child {
         font-size: 0.5rem;
     }
-
     #map {
         height: 100% !important;
     }
-
     .leaflet-popup-content {
         font-size: 0.8rem;
         min-width: 140px;
@@ -880,7 +849,6 @@ body {
     }
 }
 
-/* RESPONSIVE TABLET */
 @media (min-width: 641px) and (max-width: 1024px) {
     #header {
         padding: 12px 18px;

@@ -12,14 +12,13 @@ var map = L.map('map', {
 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// 1. DÙNG LẠI BẢN ĐỒ HOT CỦA PHÁP NHƯNG ĐÃ ÉP XUNG ĐA LUỒNG & BỘ ĐỆM TỐI ƯU
 L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     maxZoom: 19,
     subdomains: ['a', 'b', 'c'], 
     keepBuffer: 2,               
     updateWhenZooming: false,    
     updateWhenIdle: true,        
-    attribution: '&copy; OpenStreetMap contributors, Tiles style by HOT'
+    attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
 L.Routing.Localization = L.Routing.Localization || {};
@@ -53,7 +52,7 @@ let routingControl = L.Routing.control({
 routingControl.getRouter().options.language = 'vi';
 
 // =================================================================
-// 1. LOGIC NÚT ĐỊNH VỊ NHẢY LÊN KHI CÓ BẢNG CHỈ ĐƯỜNG THU GỌN
+// LOGIC BẢNG CHỈ ĐƯỜNG: NÚT ĐỊNH VỊ NHẢY LÊN & VUỐT 3 CẤP ĐỘ
 // =================================================================
 routingControl.on('routesfound', function(e) {
     let container = document.querySelector('.leaflet-routing-container');
@@ -62,7 +61,6 @@ routingControl.on('routesfound', function(e) {
         container.classList.add('show-route', 'collapsed'); 
     }
     
-    // Đẩy nút định vị lên cao né cái bảng, CHƯA ẨN ĐI
     let controls = document.querySelector('.leaflet-bottom.leaflet-right');
     if (controls) {
         controls.classList.remove('hide-controls');
@@ -74,20 +72,25 @@ routingControl.on('routingerror', function(e) {
     let container = document.querySelector('.leaflet-routing-container');
     if (container) container.classList.remove('show-route', 'collapsed', 'expanded');
     
-    // Rút nút định vị về vị trí cũ dưới đáy
     let controls = document.querySelector('.leaflet-bottom.leaflet-right');
     if (controls) controls.classList.remove('hide-controls', 'lift-up');
 });
 
-// =================================================================
-// 2. VUỐT 3 CẤP ĐỘ: THU GỌN <-> MỞ RỘNG <-> ĐÓNG HOÀN TOÀN
-// =================================================================
 setTimeout(() => {
     let routingContainer = document.querySelector('.leaflet-routing-container');
     if (routingContainer) {
         let startY = 0;
         let currentY = 0;
         let isDragging = false;
+
+        routingContainer.addEventListener('click', function(e) {
+            if (routingContainer.classList.contains('collapsed')) {
+                routingContainer.classList.remove('collapsed');
+                routingContainer.classList.add('expanded');
+                let controls = document.querySelector('.leaflet-bottom.leaflet-right');
+                if (controls) controls.classList.add('hide-controls');
+            }
+        });
 
         routingContainer.addEventListener('touchstart', function(e) {
             if (routingContainer.scrollTop > 0) return; 
@@ -101,10 +104,8 @@ setTimeout(() => {
             currentY = e.touches[0].clientY;
             let deltaY = currentY - startY;
 
-            if (routingContainer.classList.contains('collapsed')) {
+            if (routingContainer.classList.contains('collapsed') && deltaY > 0) {
                 routingContainer.style.transform = `translateY(${deltaY}px)`; 
-            } else if (routingContainer.classList.contains('expanded') && deltaY > 0) {
-                routingContainer.style.transform = `translateY(${deltaY}px)`;
             }
         }, { passive: true });
 
@@ -117,21 +118,23 @@ setTimeout(() => {
             let controls = document.querySelector('.leaflet-bottom.leaflet-right');
             
             if (routingContainer.classList.contains('collapsed')) {
-                if (deltaY < -40) {
-                    // KÉO LÊN: Mở rộng bảng -> Ẩn nút định vị đi
+                if (deltaY < -30) {
                     routingContainer.classList.remove('collapsed');
                     routingContainer.classList.add('expanded');
                     if (controls) controls.classList.add('hide-controls');
                     
                 } else if (deltaY > 40) {
-                    // KÉO XUỐNG: Đóng hẳn -> Hiện lại nút và rớt xuống đáy
+                    // Xóa class để CSS tự động kéo rớt bảng xuống
                     routingContainer.classList.remove('show-route', 'collapsed', 'expanded');
-                    routingControl.setWaypoints([]); 
                     if (controls) controls.classList.remove('hide-controls', 'lift-up');
+                    
+                    // CHỜ 400ms MỚI XÓA DATA, ĐỂ CSS KỊP CHẠY ANIMATION TRƯỢT XUỐNG
+                    setTimeout(() => {
+                        routingControl.setWaypoints([]); 
+                    }, 400); 
                 }
             } else if (routingContainer.classList.contains('expanded')) {
-                if (deltaY > 50 && routingContainer.scrollTop <= 0) {
-                    // KÉO XUỐNG TỪ TRÊN ĐỈNH: Thu gọn lại -> Hiện lại nút và bị đẩy lên cao
+                if (deltaY > 40 && routingContainer.scrollTop <= 0) {
                     routingContainer.classList.remove('expanded');
                     routingContainer.classList.add('collapsed');
                     if (controls) {
@@ -213,18 +216,19 @@ function removeVietnameseTones(str) {
 }
 
 // =================================================================
-// 3. XỬ LÝ THẺ THÔNG TIN (INFO SHEET) CŨNG ĐẨY NÚT ĐỊNH VỊ LÊN
+// THẺ THÔNG TIN BOTTOM SHEET (CÓ VUỐT ĐÓNG & 2 NÚT BẤM)
 // =================================================================
 function openInfoSheet(ten, phongCu, diaChi, sdt, lat, lng) {
     let routingContainer = document.querySelector('.leaflet-routing-container');
-    if (routingContainer) {
+    if (routingContainer && routingContainer.classList.contains('show-route')) {
         routingContainer.classList.remove('show-route', 'expanded', 'collapsed'); 
-    }
-    if (typeof routingControl !== 'undefined') {
-        routingControl.setWaypoints([]); 
+        setTimeout(() => {
+            if (typeof routingControl !== 'undefined') routingControl.setWaypoints([]); 
+        }, 400); // Đợi bảng chỉ đường tụt xuống xong mới xóa data để tránh giật
+    } else {
+        if (typeof routingControl !== 'undefined') routingControl.setWaypoints([]); 
     }
 
-    // Đẩy nút định vị lên cao để né Info Sheet
     let controls = document.querySelector('.leaflet-bottom.leaflet-right');
     if (controls) {
         controls.classList.remove('hide-controls');
@@ -244,13 +248,11 @@ function openInfoSheet(ten, phongCu, diaChi, sdt, lat, lng) {
         `;
         document.body.appendChild(sheet);
 
-        // Đóng Info bằng nút X
         document.getElementById('close-sheet-btn').addEventListener('click', function() {
             sheet.classList.remove('show');
-            if (controls) controls.classList.remove('lift-up'); // Trả nút về đáy
+            if (controls) controls.classList.remove('lift-up'); 
         });
 
-        // Đóng Info bằng cách vuốt xuống
         let startY = 0;
         let currentY = 0;
         let isDragging = false;
@@ -265,17 +267,20 @@ function openInfoSheet(ten, phongCu, diaChi, sdt, lat, lng) {
             if (!isDragging) return;
             currentY = e.touches[0].clientY;
             let deltaY = currentY - startY;
-            if (deltaY > 0) sheet.style.transform = `translateY(${deltaY}px)`; 
+            if (deltaY > 0) {
+                sheet.style.transform = `translateY(${deltaY}px)`; 
+            }
         }, { passive: true });
 
         sheet.addEventListener('touchend', function(e) {
+            if (!isDragging) return;
             isDragging = false;
             sheet.style.transition = ''; 
             let deltaY = currentY - startY;
 
             if (deltaY > 100) { 
                 sheet.classList.remove('show');
-                if (controls) controls.classList.remove('lift-up'); // Trả nút về đáy
+                if (controls) controls.classList.remove('lift-up'); 
                 setTimeout(() => { sheet.style.transform = ''; }, 300); 
             } else {
                 sheet.style.transform = '';
@@ -288,9 +293,15 @@ function openInfoSheet(ten, phongCu, diaChi, sdt, lat, lng) {
         <p><b>Phường/xã cũ:</b> ${phongCu}</p>
         <p><b>Địa chỉ:</b> ${diaChi}</p>
         <p><b>SĐT:</b> ${sdt}</p>
-        <button class="route-btn" onclick="getRouteTo(${lat}, ${lng})">
-            <i class="fas fa-directions"></i> Chỉ đường
-        </button>
+        
+        <div class="action-buttons">
+            <button class="route-btn" onclick="getRouteTo(${lat}, ${lng})">
+                <i class="fas fa-directions"></i> Chỉ đường
+            </button>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" class="gg-map-btn">
+                <i class="fas fa-map-marked-alt"></i> GG Maps
+            </a>
+        </div>
     `;
     
     document.getElementById('sheet-content').innerHTML = contentHTML;
@@ -323,6 +334,9 @@ function createMarker(feature, latlng) {
     return marker;
 }
 
+// =================================================================
+// LAZY LOAD DỮ LIỆU MARKER & RANH GIỚI BẢN ĐỒ
+// =================================================================
 setTimeout(function() {
     fetch(geoJsonUrl)
         .then(response => { if (!response.ok) throw new Error('Lỗi GeoJSON.'); return response.json(); })
@@ -583,7 +597,6 @@ setTimeout(function() {
         .catch(error => console.error('Lỗi ranh giới:', error));
 }, 800);
 
-// Đóng Info khi chạm ra bản đồ cũng phải rút nút về lại đáy
 map.on('click', function() {
     let sheet = document.getElementById('info-bottom-sheet');
     if (sheet && sheet.classList.contains('show')) {
